@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const chalk = require("chalk");
-const config = require("./config.json")
+const config = require("./config.json");
 const cors = require("cors");
 
 const routes = require("./routes");
@@ -13,12 +13,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 app.use("/api", routes);
 
-const PORT = config.get("port") ?? 8080;
+const PORT = config.port ?? 8080;
 
 const start = async () => {
     try {
         mongoose.set("strictQuery", true);
-        await mongoose.connect(config.get("mongoUri"));
+        await mongoose.connect(config.mongoUri);
         console.log(chalk.green("MongoDB is connected"));
         app.listen(PORT, () => {
             console.log(
