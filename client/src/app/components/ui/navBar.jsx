@@ -5,7 +5,7 @@ import Logo from "./logo";
 import NavProfile from "./navProfile";
 
 const NavBar = () => {
-    const isLoggedIng = false;
+    const isLoggedIng = true;
 
     return (
         <nav className="navbar mb-3 border border-secondary-subtle">
@@ -14,20 +14,25 @@ const NavBar = () => {
                     <li className="nav-item">
                         <Logo to="/" />
                     </li>
-                    <li className="nav-item">
-                        <Link className="nav-link" to="/">
-                            Создать
-                        </Link>
-                    </li>
-                    <li className="nav-item">
-                        <Link className="nav-link" to="/models">
-                            Модели
-                        </Link>
-                    </li>
                 </ul>
                 <ul className="d-flex align-items-baseline nav">
+                    <li className="nav-item">
+                        <Link className="nav-link" to="/">
+                            Главная
+                        </Link>
+                    </li>
                     {isLoggedIng ? (
                         <>
+                            <li className="nav-item">
+                                <Link className="nav-link" to="/creation">
+                                    Создать
+                                </Link>
+                            </li>
+                            <li className="nav-item">
+                                <Link className="nav-link" to="/models">
+                                    Модели
+                                </Link>
+                            </li>
                             <li className="nav-item">
                                 <NavProfile />
                             </li>
