@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 
+import RegistrationForm from "../ui/registrationForm";
+
 const Auth = () => {
     const { type } = useParams();
     const [formType, setFormType] = useState(
@@ -20,7 +22,7 @@ const Auth = () => {
                     {formType === "registration" ? (
                         <>
                             <h3 className="mb-4">Регистрация</h3>
-                            {/* <RegistrationForm /> */}
+                            <RegistrationForm />
                             <p className="d-flex align-items-baseline">
                                 Уже имеете аккаунт?
                                 <button

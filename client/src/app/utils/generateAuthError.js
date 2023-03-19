@@ -1,11 +1,11 @@
 const generateAuthError = message => {
     switch (message) {
         case "EMAIL_EXISTS":
-            return "Пользователь с таким Email уже существует";
+            return "Пользователь с такой электронной почтой уже существует";
         case "INVALID_PASSWORD":
-            return "Email или пароль введены некорректно";
+            return "Почта или пароль введены некорректно";
         case "EMAIL_NOT_FOUND":
-            return "Email или пароль введены некорректно";
+            return "Почта или пароль введены некорректно";
         default:
             return "Слишком много попыток входа. Попробуйте позднее";
     }
