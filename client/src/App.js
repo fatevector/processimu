@@ -1,4 +1,4 @@
-import { Route, Switch } from "react-router-dom";
+import { Redirect, Route, Switch } from "react-router-dom";
 
 import NavBar from "./app/components/ui/navBar";
 import Main from "./app/components/layout/main";
@@ -17,6 +17,7 @@ function App() {
                 <Route exact path="/logout" component={LogOut} />
                 <Route exact path="/creation" component={ModelCreation} />
                 <Route exact path="/models/:modelId?" component={ModelsList} />
+                <Redirect to="/" />
             </Switch>
         </div>
     );
