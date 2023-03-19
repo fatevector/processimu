@@ -1,7 +1,7 @@
 const ModelCreationPage = () => {
     return (
         <div className="m-3">
-            <h1>Страница создания модели</h1>
+            <h3>Создание модели</h3>
         </div>
     );
 };

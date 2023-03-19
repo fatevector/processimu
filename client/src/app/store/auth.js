@@ -191,4 +191,6 @@ export const getCurrentUserData = () => state => state.auth.user;
 
 export const getAuthErrors = () => state => state.auth.error;
 
+export const getUserModels = () => state => state.auth.user?.models;
+
 export default authReducer;
