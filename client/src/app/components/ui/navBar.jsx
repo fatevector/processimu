@@ -1,11 +1,14 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+
+import { getIsLoggedIn } from "../../store/auth";
 
 import Logo from "./logo";
 import NavProfile from "./navProfile";
 
 const NavBar = () => {
-    const isLoggedIng = true;
+    const isLoggedIn = useSelector(getIsLoggedIn());
 
     return (
         <nav className="navbar mb-3 border border-secondary-subtle">
@@ -21,7 +24,7 @@ const NavBar = () => {
                             Главная
                         </Link>
                     </li>
-                    {isLoggedIng ? (
+                    {isLoggedIn ? (
                         <>
                             <li className="nav-item">
                                 <Link className="nav-link" to="/creation">
