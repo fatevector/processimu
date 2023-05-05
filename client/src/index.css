@@ -15,3 +15,34 @@ code {
 .logo {
   cursor: pointer;
 }
+
+.gridWrap {
+  width: 600px;
+  height: 600px;
+  overflow: hidden;
+}
+
+.grid {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  top: 0;
+  left: 0;
+}
+
+.gridRow {
+  display: flex;
+  flex-direction: row;
+  /* flex-wrap: nowrap; */
+}
+
+.gridCell {
+  width: 50px;
+  height: 50px;
+  background-color: rgb(244, 244, 244);
+  border: 1px solid lightgray;
+  display: flex;
+  flex-shrink: 0;
+}
