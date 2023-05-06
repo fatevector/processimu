@@ -1,4 +1,4 @@
-const Grid = ({ data }) => {
+const Grid = ({ mapWidth, mapHeight }) => {
     let dragObject = {};
 
     document.onmousedown = e => {
@@ -24,8 +24,8 @@ const Grid = ({ data }) => {
         const field = e.target.closest(".droppable");
         const fieldWidth = field.getBoundingClientRect().width;
         const fieldHeight = field.getBoundingClientRect().height;
-        dragObject.minLeft = fieldWidth - data[0].length * 50;
-        dragObject.minTop = fieldHeight - data.length * 50;
+        dragObject.minLeft = fieldWidth - mapWidth;
+        dragObject.minTop = fieldHeight - mapHeight;
         dragObject.maxLeft = 0;
         dragObject.maxTop = 0;
     };
@@ -57,18 +57,11 @@ const Grid = ({ data }) => {
     };
 
     return (
-        <div className="gridWrap droppable">
-            <div className="grid draggable">
-                {data.map(row => (
-                    <div className="gridRow" key={Math.random()}>
-                        {row.map(cell => (
-                            <div className="gridCell" key={Math.random()}>
-                                {cell}
-                            </div>
-                        ))}
-                    </div>
-                ))}
-            </div>
+        <div className="field droppable">
+            <div
+                className="map draggable"
+                style={{ width: mapWidth, height: mapHeight }}
+            ></div>
         </div>
     );
 };

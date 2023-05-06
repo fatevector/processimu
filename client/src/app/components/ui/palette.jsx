@@ -16,7 +16,13 @@ const Palette = () => {
         <div className="d-flex flex-column">
             {elements.map(el => (
                 <div className="paletteCell" key={Math.random()}>
-                    <img src={el.src} alt={el.alt} width="40" height="40" />
+                    <img
+                        src={el.src}
+                        alt={el.alt}
+                        width="40"
+                        height="40"
+                        draggable={false}
+                    />
                 </div>
             ))}
         </div>

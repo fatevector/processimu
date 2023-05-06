@@ -5,8 +5,6 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* background-image: url("./app/icons/map.png");
-  background-size: 50px; */
 }
 
 code {
@@ -18,13 +16,15 @@ code {
   cursor: pointer;
 }
 
-.gridWrap {
+.field {
   width: 600px;
   height: 600px;
   overflow: hidden;
+  border: 2px solid darkgray;
+  border-radius: 5px;
 }
 
-.grid {
+.map {
   padding: 0;
   margin: 0;
   display: flex;
@@ -32,12 +32,14 @@ code {
   position: relative;
   top: 0;
   left: 0;
+  background-image: url("./app/icons/map.png");
+  background-size: 50px;
 }
 
-.gridRow {
+/* .gridRow {
   display: flex;
   flex-direction: row;
-  /* flex-wrap: nowrap; */
+  flex-wrap: nowrap;
 }
 
 .gridCell {
@@ -47,7 +49,7 @@ code {
   border: 1px solid lightgray;
   display: flex;
   flex-shrink: 0;
-}
+} */
 
 .paletteCell {
   width: 50px;

@@ -2,14 +2,8 @@ import Grid from "../ui/grid";
 import Palette from "../ui/palette";
 
 const ModelCreationPage = () => {
-    const n = 15;
-    const data = new Array(n);
-    data.fill(null);
-    data.forEach((_, i) => {
-        const row = new Array(n);
-        row.fill(null);
-        data[i] = row;
-    });
+    const mapWidth = 750;
+    const mapHeight = 750;
 
     return (
         <div className="m-3">
@@ -17,7 +11,7 @@ const ModelCreationPage = () => {
             <div className="controlBar"></div>
             <div className="d-flex flex-row justify-content-around">
                 <Palette />
-                <Grid data={data} />
+                <Grid mapWidth={mapWidth} mapHeight={mapHeight} />
             </div>
         </div>
     );
