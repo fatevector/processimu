@@ -5,6 +5,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* background-image: url("./app/icons/map.png");
+  background-size: 50px; */
 }
 
 code {
@@ -45,4 +47,12 @@ code {
   border: 1px solid lightgray;
   display: flex;
   flex-shrink: 0;
+}
+
+.paletteCell {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

@@ -1,4 +1,5 @@
 import Grid from "../ui/grid";
+import Palette from "../ui/palette";
 
 const ModelCreationPage = () => {
     const n = 15;
@@ -13,7 +14,11 @@ const ModelCreationPage = () => {
     return (
         <div className="m-3">
             <h3>Создание модели</h3>
-            <Grid data={data} />
+            <div className="controlBar"></div>
+            <div className="d-flex flex-row justify-content-around">
+                <Palette />
+                <Grid data={data} />
+            </div>
         </div>
     );
 };
