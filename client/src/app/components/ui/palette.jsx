@@ -12,6 +12,7 @@ const Palette = () => {
             alt: "queue"
         }
     ];
+
     return (
         <div className="d-flex flex-column">
             {elements.map(el => (
@@ -22,6 +23,7 @@ const Palette = () => {
                         width="40"
                         height="40"
                         draggable={false}
+                        className="draggable"
                     />
                 </div>
             ))}

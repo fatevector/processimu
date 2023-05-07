@@ -15,12 +15,12 @@ const store = createStore();
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
     <Router history={history}>
-        <React.StrictMode>
-            <Provider store={store}>
-                <AppLoader>
-                    <App />
-                </AppLoader>
-            </Provider>
-        </React.StrictMode>
+        {/* <React.StrictMode> */}
+        <Provider store={store}>
+            <AppLoader>
+                <App />
+            </AppLoader>
+        </Provider>
+        {/* </React.StrictMode> */}
     </Router>
 );
