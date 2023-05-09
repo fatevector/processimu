@@ -1,10 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Grid from "../ui/grid";
 import Palette from "../ui/palette";
 
 const ModelCreationPage = () => {
     const mapWidth = 600;
     const mapHeight = 600;
+    const [devices, setDevices] = useState([]);
+    // const [selected, setSelected] = useState(null);
+    // const [paths, setPaths] = useState();
 
     useEffect(() => {
         let dragObject = {};
@@ -129,7 +132,7 @@ const ModelCreationPage = () => {
                 const width = dropElem.getBoundingClientRect().width;
                 const height = dropElem.getBoundingClientRect().height;
                 let oldStyle = dropElem.getAttribute("style");
-                if (left + 40 > width - 100) {
+                if (left + 42 > width - 100) {
                     dropElem.setAttribute(
                         "style",
                         `${oldStyle} width:${width + 100}px;`
@@ -137,7 +140,7 @@ const ModelCreationPage = () => {
                 }
                 // снова присваиваем на случай, если уже изменили ширину
                 oldStyle = dropElem.getAttribute("style");
-                if (top + 40 > height - 100) {
+                if (top + 42 > height - 100) {
                     dropElem.setAttribute(
                         "style",
                         `${oldStyle} height:${height + 100}px`

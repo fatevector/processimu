@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 
 const Grid = ({ mapWidth, mapHeight }) => {
+    // const devices = []
+
     //перетаскивание сетки
     useEffect(() => {
         let dragObject = {};
@@ -83,7 +85,13 @@ const Grid = ({ mapWidth, mapHeight }) => {
             <div
                 className="map droppable"
                 // style={{ width: mapWidth, height: mapHeight }}
-            ></div>
+            >
+                {/* <svg
+                    id="svg"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                ></svg> */}
+            </div>
         </div>
     );
 };
