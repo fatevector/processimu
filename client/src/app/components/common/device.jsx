@@ -1,6 +1,13 @@
-const Device = ({ className, device }) => {
+const Device = ({ className, device, left, top }) => {
+    const style = {
+        left,
+        top
+    };
     return (
-        <div className={className + " device"}>
+        <div
+            className={(className ? className : "") + " draggable device"}
+            style={style}
+        >
             <img
                 src={device.src}
                 alt={device.name}
@@ -10,7 +17,7 @@ const Device = ({ className, device }) => {
                 className=""
             />
             {device.ports.map(port => (
-                <div className={port.side + " side"} key={Math.random()} />
+                <div className={port.side + " side"} key={port.id} />
             ))}
         </div>
     );

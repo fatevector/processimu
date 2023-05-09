@@ -1,11 +1,29 @@
 import { useEffect, useState } from "react";
 import Grid from "../ui/grid";
 import Palette from "../ui/palette";
+import sourceImg from "../../icons/icons8-arrow-right-64.png"; // https://icons8.com/icons/set/start
 
 const ModelCreationPage = () => {
     const mapWidth = 600;
     const mapHeight = 600;
-    const [devices, setDevices] = useState([]);
+    const [devices, setDevices] = useState([
+        {
+            src: sourceImg,
+            name: "source",
+            id: Math.random(),
+            ports: [
+                {
+                    id: Math.random(),
+                    side: "right",
+                    entrance: "out"
+                }
+            ],
+            position: {
+                left: 40,
+                top: 80
+            }
+        }
+    ]);
     // const [selected, setSelected] = useState(null);
     // const [paths, setPaths] = useState();
 
@@ -169,7 +187,11 @@ const ModelCreationPage = () => {
             <div className="controlBar"></div>
             <div className="d-flex flex-row justify-content-evenly">
                 <Palette />
-                <Grid mapWidth={mapWidth} mapHeight={mapHeight} />
+                <Grid
+                    mapWidth={mapWidth}
+                    mapHeight={mapHeight}
+                    devices={devices}
+                />
             </div>
         </div>
     );

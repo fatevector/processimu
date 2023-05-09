@@ -1,6 +1,7 @@
 import { useEffect } from "react";
+import Device from "../common/device";
 
-const Grid = ({ mapWidth, mapHeight }) => {
+const Grid = ({ mapWidth, mapHeight, devices }) => {
     // const devices = []
 
     //перетаскивание сетки
@@ -86,6 +87,14 @@ const Grid = ({ mapWidth, mapHeight }) => {
                 className="map droppable"
                 // style={{ width: mapWidth, height: mapHeight }}
             >
+                {devices.map(device => (
+                    <Device
+                        device={device}
+                        key={device.id}
+                        left={device.position.left}
+                        top={device.position.top}
+                    />
+                ))}
                 {/* <svg
                     id="svg"
                     viewBox="0 0 100 100"

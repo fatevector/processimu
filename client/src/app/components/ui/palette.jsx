@@ -48,7 +48,7 @@ const Palette = () => {
         <div className="d-flex flex-column">
             {devices.map(device => (
                 <div className="paletteCell" key={Math.random()}>
-                    <Device className="draggable" device={device} />
+                    {/* <Device device={device} /> */}
                 </div>
             ))}
         </div>
