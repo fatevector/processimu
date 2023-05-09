@@ -84,17 +84,20 @@ const Grid = ({ mapWidth, mapHeight, devices }) => {
     return (
         <div className="field">
             <div
-                className="map droppable"
+                className="map"
                 // style={{ width: mapWidth, height: mapHeight }}
             >
-                {devices.map(device => (
-                    <Device
-                        device={device}
-                        key={device.id}
-                        left={device.position.left}
-                        top={device.position.top}
-                    />
-                ))}
+                {devices
+                    .filter(d => d.parent === "map")
+                    .map(device => (
+                        <Device
+                            device={device}
+                            key={device.id}
+                            left={device.position.left}
+                            top={device.position.top}
+                            zIndex={device.position.zIndex}
+                        />
+                    ))}
                 {/* <svg
                     id="svg"
                     viewBox="0 0 100 100"

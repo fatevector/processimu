@@ -1,12 +1,16 @@
-const Device = ({ className, device, left, top }) => {
+const Device = ({ className, device, left, top, zIndex }) => {
     const style = {
         left,
-        top
+        top,
+        zIndex
     };
+    // console.log(left, top);
     return (
         <div
             className={(className ? className : "") + " draggable device"}
             style={style}
+            data-id={device.id}
+            draggable={false}
         >
             <img
                 src={device.src}
@@ -17,7 +21,11 @@ const Device = ({ className, device, left, top }) => {
                 className=""
             />
             {device.ports.map(port => (
-                <div className={port.side + " side"} key={port.id} />
+                <div
+                    className={port.side + " point"}
+                    key={port.side}
+                    draggable={false}
+                />
             ))}
         </div>
     );

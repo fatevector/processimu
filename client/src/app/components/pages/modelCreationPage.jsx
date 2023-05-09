@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
+
+import generateId from "../../utils/generateId";
+import sourceImg from "../../icons/icons8-arrow-right-64.png"; // https://icons8.com/icons/set/start
+
 import Grid from "../ui/grid";
 import Palette from "../ui/palette";
-import sourceImg from "../../icons/icons8-arrow-right-64.png"; // https://icons8.com/icons/set/start
+import Device from "../common/device";
 
 const ModelCreationPage = () => {
     const mapWidth = 600;
@@ -10,22 +14,90 @@ const ModelCreationPage = () => {
         {
             src: sourceImg,
             name: "source",
-            id: Math.random(),
+            id: generateId(),
             ports: [
                 {
-                    id: Math.random(),
                     side: "right",
-                    entrance: "out"
+                    entrance: "out",
+                    next: null
                 }
+                // {
+                //     side: "left",
+                //     entrance: "out"
+                // },
+                // {
+                //     side: "top",
+                //     entrance: "out"
+                // },
+                // {
+                //     side: "bottom",
+                //     entrance: "out"
+                // }
             ],
             position: {
                 left: 40,
-                top: 80
-            }
+                top: 80,
+                zIndex: "auto"
+            },
+            parent: "map"
         }
     ]);
     // const [selected, setSelected] = useState(null);
     // const [paths, setPaths] = useState();
+
+    const removeDevice = id => {
+        // TODO: сначала удалить все ссылки на это устройство у других устройств
+        setDevices(prev => prev.filter(d => d.id !== id));
+    };
+
+    const addDevice = (config, left, top) => {
+        const newDevice = {
+            ...config,
+            id: generateId(),
+            position: {
+                left,
+                top,
+                zIndex: 1
+            },
+            parent: "doc"
+        };
+        setDevices(prev => {
+            const arr = [...prev];
+            arr.push(newDevice);
+            return arr;
+        });
+        return newDevice;
+    };
+
+    const editDevicePosition = (id, left, top, zIndex) => {
+        setDevices(prev =>
+            prev.map(d => {
+                return d.id !== id
+                    ? d
+                    : {
+                          ...d,
+                          position: {
+                              left,
+                              top,
+                              zIndex
+                          }
+                      };
+            })
+        );
+    };
+
+    const editDeviceParent = (id, parent) => {
+        setDevices(prev =>
+            prev.map(d => {
+                return d.id !== id
+                    ? d
+                    : {
+                          ...d,
+                          parent
+                      };
+            })
+        );
+    };
 
     useEffect(() => {
         let dragObject = {};
@@ -58,21 +130,23 @@ const ModelCreationPage = () => {
         }
 
         function createAvatar(e) {
-            var avatar = dragObject.elem.cloneNode(true); // сюда можно вставить замену аватара элементом
-            const left = getCoords(dragObject.elem).left;
-            const top = getCoords(dragObject.elem).top;
-            if (dragObject.elem.dataset.onMap) {
-                dragObject.elem.parentNode?.removeChild(dragObject.elem);
-            }
-            document.body.appendChild(avatar);
-            avatar.style.zIndex = 9999;
-            avatar.style.position = "absolute";
-            avatar.style.left = left + "px";
-            avatar.style.top = top + "px";
+            const target = e.target;
+            if (Array.from(target.classList).find(c => c === "point"))
+                return null;
+            const avatar = dragObject.elem;
+            const id = avatar.dataset.id;
+            // const left = getCoords(dragObject.elem).left; //
+            // const top = getCoords(dragObject.elem).top; //
+            // console.log(left, top);
+            // if (dragObject.elem.dataset.onMap) {
+            //     dragObject.elem.parentNode?.removeChild(dragObject.elem);
+            // }
+            editDeviceParent(id, "doc");
+            // editDevicePosition(id, left, top, 1); //
 
             // функция для отмены переноса
             avatar.rollback = function () {
-                avatar.parentNode.removeChild(avatar);
+                removeDevice(id);
             };
 
             return avatar;
@@ -104,47 +178,54 @@ const ModelCreationPage = () => {
             }
 
             // отобразить перенос объекта при каждом движении мыши
-            dragObject.avatar.style.left = e.pageX - dragObject.shiftX + "px";
-            dragObject.avatar.style.top = e.pageY - dragObject.shiftY + "px";
+            const id = dragObject.avatar.dataset.id;
+            editDevicePosition(
+                id,
+                e.pageX - dragObject.shiftX,
+                e.pageY - dragObject.shiftY,
+                1
+            );
+
+            // запоминаем последнюю позицию устройства
+            dragObject.lastPosition = {
+                left: e.pageX - dragObject.shiftX,
+                top: e.pageY - dragObject.shiftY
+            };
 
             return false;
         });
 
         function findDroppable(event) {
-            // спрячем переносимый элемент
-            dragObject.avatar.hidden = true;
+            const map = document.querySelector(".map");
+            const field = document.querySelector(".field");
+            const fieldCoords = field.getBoundingClientRect();
 
-            // получить самый вложенный элемент под курсором мыши
-            var elem = document.elementFromPoint(event.clientX, event.clientY);
-
-            // показать переносимый элемент обратно
-            dragObject.avatar.hidden = false;
-
-            if (elem == null) {
-                // такое возможно, если курсор мыши "вылетел" за границу окна
-                return null;
-            }
-
-            return elem.closest(".droppable");
+            // верхний левый угол устройства над полем?
+            if (
+                fieldCoords.left <= dragObject.lastPosition.left &&
+                fieldCoords.right >= dragObject.lastPosition.left &&
+                fieldCoords.top <= dragObject.lastPosition.top &&
+                fieldCoords.bottom >= dragObject.lastPosition.top
+            )
+                return map;
+            return null;
         }
 
         function finishDrag(e) {
             var dropElem = findDroppable(e);
 
             if (dropElem) {
-                const oldLeft = +dragObject.avatar.style.left.slice(0, -2) || 0;
-                const oldTop = +dragObject.avatar.style.top.slice(0, -2) || 0;
-                dragObject.avatar.parentNode.removeChild(dragObject.avatar);
-                dragObject.avatar.style.zIndex = "auto";
+                const id = dragObject.avatar.dataset.id;
+                const oldLeft = dragObject.lastPosition.left;
+                const oldTop = dragObject.lastPosition.top;
 
                 const coords = getCoords(dropElem);
                 const left = oldLeft - coords.left;
                 const top = oldTop - coords.top;
-                dragObject.avatar.style.left = left + "px";
-                dragObject.avatar.style.top = top + "px";
+                editDevicePosition(id, left, top, "auto");
+                editDeviceParent(id, "map");
 
-                dropElem.appendChild(dragObject.avatar);
-                dragObject.avatar.dataset.onMap = true;
+                dragObject.avatar.dataset.onMap = true; // TODO: убрать?
 
                 // расширяем карту
                 const width = dropElem.getBoundingClientRect().width;
@@ -193,6 +274,17 @@ const ModelCreationPage = () => {
                     devices={devices}
                 />
             </div>
+            {devices
+                .filter(d => d.parent === "doc")
+                .map(device => (
+                    <Device
+                        device={device}
+                        key={device.id}
+                        left={device.position.left}
+                        top={device.position.top}
+                        zIndex={device.position.zIndex}
+                    />
+                ))}
         </div>
     );
 };
