@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 
 import generateId from "../../utils/generateId";
-import sourceImg from "../../icons/icons8-arrow-right-64.png"; // https://icons8.com/icons/set/start
+// import sourceImg from "../../icons/icons8-arrow-right-64.png"; // https://icons8.com/icons/set/start
+import getDeviceConfig from "../../utils/getDeviceConfig";
 
 import Grid from "../ui/grid";
 import Palette from "../ui/palette";
@@ -10,38 +11,7 @@ import Device from "../common/device";
 const ModelCreationPage = () => {
     const mapWidth = 600;
     const mapHeight = 600;
-    const [devices, setDevices] = useState([
-        {
-            src: sourceImg,
-            name: "source",
-            id: generateId(),
-            ports: [
-                {
-                    side: "right",
-                    entrance: "out",
-                    next: null
-                }
-                // {
-                //     side: "left",
-                //     entrance: "out"
-                // },
-                // {
-                //     side: "top",
-                //     entrance: "out"
-                // },
-                // {
-                //     side: "bottom",
-                //     entrance: "out"
-                // }
-            ],
-            position: {
-                left: 40,
-                top: 80,
-                zIndex: "auto"
-            },
-            parent: "map"
-        }
-    ]);
+    const [devices, setDevices] = useState([]);
     // const [selected, setSelected] = useState(null);
     // const [paths, setPaths] = useState();
 
@@ -117,6 +87,24 @@ const ModelCreationPage = () => {
             // запомнить координаты, с которых начат перенос объекта
             dragObject.downX = e.pageX;
             dragObject.downY = e.pageY;
+
+            if (
+                Array.from(e.target.classList).find(c => c === "paletteElement")
+            ) {
+                const type = e.target.dataset.type;
+                const newDeviceConfig = getDeviceConfig(type);
+                if (!newDeviceConfig) return;
+                const coords = getCoords(dragObject.elem);
+                const { id } = addDevice(
+                    newDeviceConfig,
+                    coords.left - 1,
+                    coords.top - 1
+                );
+                dragObject.fromPalette = true;
+                dragObject.id = id;
+            } else {
+                dragObject.id = elem.dataset.id;
+            }
         });
 
         function getCoords(elem) {
@@ -131,18 +119,22 @@ const ModelCreationPage = () => {
 
         function createAvatar(e) {
             const target = e.target;
+
+            // если схватили за точку крепления
             if (Array.from(target.classList).find(c => c === "point"))
                 return null;
-            const avatar = dragObject.elem;
+
+            let avatar;
+            if (dragObject.fromPalette) {
+                // если только что созданное устройство с палитры
+                const elem = document.elementFromPoint(e.clientX, e.clientY);
+                avatar = elem.closest(".draggable");
+                dragObject.fromPalette = false;
+            } else {
+                avatar = dragObject.elem;
+            }
             const id = avatar.dataset.id;
-            // const left = getCoords(dragObject.elem).left; //
-            // const top = getCoords(dragObject.elem).top; //
-            // console.log(left, top);
-            // if (dragObject.elem.dataset.onMap) {
-            //     dragObject.elem.parentNode?.removeChild(dragObject.elem);
-            // }
             editDeviceParent(id, "doc");
-            // editDevicePosition(id, left, top, 1); //
 
             // функция для отмены переноса
             avatar.rollback = function () {
@@ -196,6 +188,7 @@ const ModelCreationPage = () => {
         });
 
         function findDroppable(event) {
+            if (!dragObject.lastPosition) return null;
             const map = document.querySelector(".map");
             const field = document.querySelector(".field");
             const fieldCoords = field.getBoundingClientRect();
@@ -225,8 +218,6 @@ const ModelCreationPage = () => {
                 editDevicePosition(id, left, top, "auto");
                 editDeviceParent(id, "map");
 
-                dragObject.avatar.dataset.onMap = true; // TODO: убрать?
-
                 // расширяем карту
                 const width = dropElem.getBoundingClientRect().width;
                 const height = dropElem.getBoundingClientRect().height;
@@ -254,6 +245,12 @@ const ModelCreationPage = () => {
             // обрабываем конец переноса, если он идёт
             if (dragObject.avatar) {
                 finishDrag(e);
+            } else {
+                // если кликнули на устройство из палитры,
+                // но не двигали его, то удалим его (палитра вне поля)
+                if (dragObject.fromPalette) {
+                    removeDevice(dragObject.id);
+                }
             }
 
             // в конце mouseup перенос либо завершился, либо даже не начинался

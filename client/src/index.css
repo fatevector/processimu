@@ -59,6 +59,10 @@ code {
   align-items: center;
 }
 
+.paletteElement {
+  user-select: none;
+}
+
 .device {
   border: 1px solid black;
   border-radius: 5px;
