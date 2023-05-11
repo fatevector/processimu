@@ -16,6 +16,10 @@ code {
   cursor: pointer;
 }
 
+.modelPage:focus {
+  outline: none;
+}
+
 .field {
   width: 600px;
   height: 600px;
@@ -67,11 +71,18 @@ code {
   border: 1px solid black;
   border-radius: 5px;
   background-color: white;
-  width: 42px;
-  height: 42px;
+  width: 43px;
+  height: 43px;
   position: absolute;
   user-select: none;
   z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.device.selected {
+  border: 2px solid #4327ff;
 }
 
 /* Маленькие точки крепления */
@@ -120,6 +131,10 @@ code {
   background-color: white;
 }
 
+.point.selected {
+  border: 2px solid #4327ff;
+}
+
 .point:hover {
   background-color: rgb(35, 198, 35);
 }
@@ -154,8 +169,12 @@ code {
 
 path {
   fill: none;
-  stroke: black;
   vector-effect: non-scaling-stroke;
-  stroke-width: 2px;
-  stroke: #555;
+  stroke-width: 4px;
+  stroke: black;
+}
+
+path.selected {
+  stroke-width: 6px;
+  stroke: #4327ff;
 }

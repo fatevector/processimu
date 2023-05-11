@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import generateId from "../../utils/generateId";
 import getDeviceConfig from "../../utils/getDeviceConfig";
@@ -11,11 +11,14 @@ const ModelCreationPage = () => {
     const mapWidth = 600;
     const mapHeight = 600;
     const [devices, setDevices] = useState([]);
-    // const [selected, setSelected] = useState(null);
+    const [selected, setSelected] = useState(null);
     const [paths, setPaths] = useState([]);
-    const [startConnection, setStartConnection] = useState(null); //start point
+    const [startConnection, setStartConnection] = useState(null);
 
     const removePath = id => {
+        // проверяем, не выбрано ли то, что удалится
+        if (selected && selected?.id === id) setSelected(null);
+
         setPaths(prev => prev.filter(p => p.id !== id));
     };
 
@@ -33,14 +36,36 @@ const ModelCreationPage = () => {
         return newPath;
     };
 
-    const removeDevice = id => {
-        setPaths(prev =>
-            prev.filter(
-                path => path.a.deviceId !== id && path.b.deviceId !== id // мб нужно будет удалить из-за обработки в uef
-            )
-        );
-        setDevices(prev => prev.filter(d => d.id !== id));
-    };
+    const removeDevice = useCallback(
+        id => {
+            // проверяем, не выбрано ли то, что удалится
+            console.log(selected);
+
+            if (selected) {
+                console.log(selected);
+                if (selected?.id === id) setSelected(null);
+                else {
+                    // НЕ РАБОТАЕТ ((
+                    const pathsToRemove = paths.filter(
+                        path => path.a.deviceId === id || path.b.deviceId === id
+                    );
+                    console.log(pathsToRemove);
+                    if (pathsToRemove.find(path => path.id === selected?.id))
+                        setSelected(null);
+                }
+            }
+
+            // удаляем все соединения устройства
+            setPaths(prev =>
+                prev.filter(
+                    path => path.a.deviceId !== id && path.b.deviceId !== id
+                )
+            );
+
+            setDevices(prev => prev.filter(d => d.id !== id));
+        },
+        [selected]
+    );
 
     const addDevice = (config, left, top) => {
         const newDevice = {
@@ -156,6 +181,24 @@ const ModelCreationPage = () => {
             else addPath(newPoint, startConnection);
 
             setStartConnection(null);
+        }
+    };
+
+    const onSelected = data => {
+        setSelected(data);
+    };
+
+    const onKeyDown = e => {
+        if (e.key === "Backspace" || e.key === "Delete") {
+            if (selected) {
+                if (selected.elementType === "path") {
+                    removePath(selected.id);
+                    setSelected(null);
+                } else if (selected.elementType === "device") {
+                    removeDevice(selected.id);
+                    setSelected(null);
+                }
+            }
         }
     };
 
@@ -387,7 +430,7 @@ const ModelCreationPage = () => {
                 const width = dropElem.getBoundingClientRect().width;
                 const height = dropElem.getBoundingClientRect().height;
                 let oldStyle = dropElem.getAttribute("style");
-                if (left + 42 > width - 100) {
+                if (left + 43 > width - 100) {
                     dropElem.setAttribute(
                         "style",
                         `${oldStyle} width:${width + 100}px;`
@@ -395,7 +438,7 @@ const ModelCreationPage = () => {
                 }
                 // снова присваиваем на случай, если уже изменили ширину
                 oldStyle = dropElem.getAttribute("style");
-                if (top + 42 > height - 100) {
+                if (top + 43 > height - 100) {
                     dropElem.setAttribute(
                         "style",
                         `${oldStyle} height:${height + 100}px`
@@ -425,7 +468,7 @@ const ModelCreationPage = () => {
     }, []);
 
     return (
-        <div className="m-3">
+        <div className="modelPage m-3" onKeyDown={onKeyDown} tabIndex={-1}>
             <h3>Создание модели</h3>
             <div className="controlBar"></div>
             <div className="d-flex flex-row justify-content-evenly">
@@ -436,6 +479,8 @@ const ModelCreationPage = () => {
                     devices={devices}
                     paths={paths}
                     makeConnection={makeConnection}
+                    onSelected={onSelected}
+                    selected={selected}
                 />
             </div>
             {devices
@@ -448,6 +493,8 @@ const ModelCreationPage = () => {
                         top={device.position.top}
                         zIndex={device.position.zIndex}
                         makeConnection={makeConnection}
+                        onSelected={onSelected}
+                        selected={selected}
                     />
                 ))}
         </div>

@@ -1,17 +1,36 @@
-const Device = ({ className, device, left, top, zIndex, makeConnection }) => {
+const Device = ({
+    className,
+    device,
+    left,
+    top,
+    zIndex,
+    makeConnection,
+    onSelected,
+    selected
+}) => {
     const style = {
         left,
         top,
         zIndex
     };
-    // console.log(left, top);
+    const onClick = e => {
+        if (Array.from(e.target.classList).find(c => c === "point")) return;
+        onSelected({
+            ...device,
+            elementType: "device"
+        });
+    };
     return (
         <div
-            className={(className ? className : "") + " draggable device"}
+            className={
+                (className ? className : "") +
+                " draggable device" +
+                (selected?.id === device.id ? " selected" : "")
+            }
             style={style}
             data-id={device.id}
             draggable={false}
-            onClick={makeConnection}
+            onClick={onClick}
         >
             <img
                 src={device.src}
@@ -23,12 +42,17 @@ const Device = ({ className, device, left, top, zIndex, makeConnection }) => {
             />
             {device.ports.map(port => (
                 <div
-                    className={port.side + " point"}
+                    className={
+                        port.side +
+                        " point" +
+                        (selected?.id === device.id ? " selected" : "")
+                    }
                     key={port.side}
                     draggable={false}
                     data-id={device.id}
                     data-side={port.side}
                     data-entrance={port.entrance}
+                    onClick={makeConnection}
                 />
             ))}
         </div>

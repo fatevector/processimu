@@ -3,7 +3,15 @@ import { useEffect } from "react";
 import Device from "../common/device";
 import Path from "../common/path";
 
-const Grid = ({ mapWidth, mapHeight, devices, paths, makeConnection }) => {
+const Grid = ({
+    mapWidth,
+    mapHeight,
+    devices,
+    paths,
+    makeConnection,
+    onSelected,
+    selected
+}) => {
     //перетаскивание сетки
     useEffect(() => {
         let dragObject = {};
@@ -94,11 +102,18 @@ const Grid = ({ mapWidth, mapHeight, devices, paths, makeConnection }) => {
                             top={device.position.top}
                             zIndex={device.position.zIndex}
                             makeConnection={makeConnection}
+                            onSelected={onSelected}
+                            selected={selected}
                         />
                     ))}
                 <svg id="svg" viewBox="0 0 100 100" preserveAspectRatio="none">
                     {paths.map(path => (
-                        <Path path={path} key={path.id}></Path>
+                        <Path
+                            path={path}
+                            key={path.id}
+                            onSelected={onSelected}
+                            selected={selected}
+                        ></Path>
                     ))}
                 </svg>
             </div>
