@@ -1,9 +1,9 @@
 import { useEffect } from "react";
+
 import Device from "../common/device";
+import Path from "../common/path";
 
-const Grid = ({ mapWidth, mapHeight, devices }) => {
-    // const devices = []
-
+const Grid = ({ mapWidth, mapHeight, devices, paths, makeConnection }) => {
     //перетаскивание сетки
     useEffect(() => {
         let dragObject = {};
@@ -83,10 +83,7 @@ const Grid = ({ mapWidth, mapHeight, devices }) => {
 
     return (
         <div className="field">
-            <div
-                className="map"
-                // style={{ width: mapWidth, height: mapHeight }}
-            >
+            <div className="map">
                 {devices
                     .filter(d => d.parent === "map")
                     .map(device => (
@@ -96,13 +93,14 @@ const Grid = ({ mapWidth, mapHeight, devices }) => {
                             left={device.position.left}
                             top={device.position.top}
                             zIndex={device.position.zIndex}
+                            makeConnection={makeConnection}
                         />
                     ))}
-                {/* <svg
-                    id="svg"
-                    viewBox="0 0 100 100"
-                    preserveAspectRatio="none"
-                ></svg> */}
+                <svg id="svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    {paths.map(path => (
+                        <Path path={path} key={path.id}></Path>
+                    ))}
+                </svg>
             </div>
         </div>
     );

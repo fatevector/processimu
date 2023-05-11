@@ -1,4 +1,4 @@
-const Device = ({ className, device, left, top, zIndex }) => {
+const Device = ({ className, device, left, top, zIndex, makeConnection }) => {
     const style = {
         left,
         top,
@@ -11,6 +11,7 @@ const Device = ({ className, device, left, top, zIndex }) => {
             style={style}
             data-id={device.id}
             draggable={false}
+            onClick={makeConnection}
         >
             <img
                 src={device.src}
@@ -25,6 +26,9 @@ const Device = ({ className, device, left, top, zIndex }) => {
                     className={port.side + " point"}
                     key={port.side}
                     draggable={false}
+                    data-id={device.id}
+                    data-side={port.side}
+                    data-entrance={port.entrance}
                 />
             ))}
         </div>

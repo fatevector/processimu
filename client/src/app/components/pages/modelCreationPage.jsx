@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
 import generateId from "../../utils/generateId";
-// import sourceImg from "../../icons/icons8-arrow-right-64.png"; // https://icons8.com/icons/set/start
 import getDeviceConfig from "../../utils/getDeviceConfig";
 
 import Grid from "../ui/grid";
@@ -13,10 +12,33 @@ const ModelCreationPage = () => {
     const mapHeight = 600;
     const [devices, setDevices] = useState([]);
     // const [selected, setSelected] = useState(null);
-    // const [paths, setPaths] = useState();
+    const [paths, setPaths] = useState([]);
+    const [startConnection, setStartConnection] = useState(null); //start point
+
+    const removePath = id => {
+        setPaths(prev => prev.filter(p => p.id !== id));
+    };
+
+    const addPath = (a, b) => {
+        const newPath = {
+            id: generateId(),
+            a,
+            b
+        };
+        setPaths(prev => {
+            const arr = [...prev];
+            arr.push(newPath);
+            return arr;
+        });
+        return newPath;
+    };
 
     const removeDevice = id => {
-        // TODO: сначала удалить все ссылки на это устройство у других устройств
+        setPaths(prev =>
+            prev.filter(
+                path => path.a.deviceId !== id && path.b.deviceId !== id // мб нужно будет удалить из-за обработки в uef
+            )
+        );
         setDevices(prev => prev.filter(d => d.id !== id));
     };
 
@@ -69,6 +91,146 @@ const ModelCreationPage = () => {
         );
     };
 
+    const htmlPxToSvgPx = (n, a, b, _a, _b) => {
+        let d = b - a; // == svgCoords.width or height
+        let _d = _b - _a; // 100 = 100 - 0
+        let u = _d / d; // 100 / svgCoords.width or height
+        return _a + n * u; // 0 + init left or top * (100 / svg width or height)
+    };
+
+    const makeConnection = e => {
+        // если клик не левой кнопкой мыши, то прерываем
+        if (e.button !== 0) {
+            return;
+        }
+
+        const elem = e.target.closest(".point");
+        if (!elem) return;
+        const deviceId = elem.dataset.id;
+        const side = elem.dataset.side;
+        const entrance = elem.dataset.entrance;
+
+        const comparePoints = (point, deviceId, side) =>
+            point.deviceId === deviceId && point.side === side;
+        const checkPointForOccupationInPath = (path, deviceId, side) =>
+            comparePoints(path.a, deviceId, side) ||
+            comparePoints(path.b, deviceId, side);
+        const checkPointForOccupation = (paths, deviceId, side) =>
+            paths.find(path =>
+                checkPointForOccupationInPath(path, deviceId, side)
+            );
+        if (checkPointForOccupation(paths, deviceId, side)) return;
+
+        const bcr = elem.getBoundingClientRect();
+        const svg = document.querySelector("#svg");
+        const svgCoords = svg.getBoundingClientRect();
+
+        const newPoint = {
+            deviceId,
+            side,
+            entrance,
+            left: htmlPxToSvgPx(
+                bcr.left - svgCoords.left + bcr.width / 2,
+                svgCoords.left,
+                svgCoords.left + svgCoords.width,
+                0,
+                100
+            ),
+            top: htmlPxToSvgPx(
+                bcr.top - svgCoords.top + bcr.height / 2,
+                svgCoords.top,
+                svgCoords.top + svgCoords.height,
+                0,
+                100
+            )
+        };
+
+        if (!startConnection) {
+            setStartConnection(newPoint);
+        } else {
+            if (startConnection.deviceId === deviceId) return;
+            if (startConnection.entrance === elem.dataset.entrance) return;
+
+            // добавляем путь от out точки к in точке
+            if (entrance === "in") addPath(startConnection, newPoint);
+            else addPath(newPoint, startConnection);
+
+            setStartConnection(null);
+        }
+    };
+
+    // useEffect для перемещения связей
+    useEffect(() => {
+        const svg = document.querySelector("#svg");
+        const svgCoords = svg.getBoundingClientRect();
+        setPaths(prev => {
+            return prev.map(path => {
+                let point = path.a;
+                let deviceId = point.deviceId;
+                let side = point.side;
+                let entrance = point.entrance;
+                let pointNode = document.querySelector(
+                    `[data-id="${deviceId}"] [data-side="${side}"]`
+                );
+                let bcr = pointNode.getBoundingClientRect();
+                const newPointA = {
+                    deviceId,
+                    side,
+                    entrance,
+                    left: htmlPxToSvgPx(
+                        bcr.left - svgCoords.left + bcr.width / 2,
+                        svgCoords.left,
+                        svgCoords.left + svgCoords.width,
+                        0,
+                        100
+                    ),
+                    top: htmlPxToSvgPx(
+                        bcr.top - svgCoords.top + bcr.height / 2,
+                        svgCoords.top,
+                        svgCoords.top + svgCoords.height,
+                        0,
+                        100
+                    )
+                };
+
+                point = path.b;
+                deviceId = point.deviceId;
+                side = point.side;
+                entrance = point.entrance;
+                pointNode = document.querySelector(
+                    `[data-id="${deviceId}"] [data-side="${side}"]`
+                );
+                bcr = pointNode.getBoundingClientRect();
+                const newPointB = {
+                    deviceId,
+                    side,
+                    entrance,
+                    left: htmlPxToSvgPx(
+                        bcr.left - svgCoords.left + bcr.width / 2,
+                        svgCoords.left,
+                        svgCoords.left + svgCoords.width,
+                        0,
+                        100
+                    ),
+                    top: htmlPxToSvgPx(
+                        bcr.top - svgCoords.top + bcr.height / 2,
+                        svgCoords.top,
+                        svgCoords.top + svgCoords.height,
+                        0,
+                        100
+                    )
+                };
+
+                return {
+                    id: path.id,
+                    a: newPointA,
+                    b: newPointB
+                };
+            });
+        });
+    }, [devices]);
+
+    // useEffect для перетаскивания устройств
     useEffect(() => {
         let dragObject = {};
 
@@ -121,7 +283,10 @@ const ModelCreationPage = () => {
             const target = e.target;
 
             // если схватили за точку крепления
-            if (Array.from(target.classList).find(c => c === "point"))
+            if (
+                Array.from(target.classList).find(c => c === "point") &&
+                !dragObject.fromPalette
+            )
                 return null;
 
             let avatar;
@@ -175,7 +340,7 @@ const ModelCreationPage = () => {
                 id,
                 e.pageX - dragObject.shiftX,
                 e.pageY - dragObject.shiftY,
-                1
+                2 // был 1
             );
 
             // запоминаем последнюю позицию устройства
@@ -215,7 +380,7 @@ const ModelCreationPage = () => {
                 const coords = getCoords(dropElem);
                 const left = oldLeft - coords.left;
                 const top = oldTop - coords.top;
-                editDevicePosition(id, left, top, "auto");
+                editDevicePosition(id, left, top, 2); // z-index был auto
                 editDeviceParent(id, "map");
 
                 // расширяем карту
@@ -269,6 +434,8 @@ const ModelCreationPage = () => {
                     mapWidth={mapWidth}
                     mapHeight={mapHeight}
                     devices={devices}
+                    paths={paths}
+                    makeConnection={makeConnection}
                 />
             </div>
             {devices
@@ -280,6 +447,7 @@ const ModelCreationPage = () => {
                         left={device.position.left}
                         top={device.position.top}
                         zIndex={device.position.zIndex}
+                        makeConnection={makeConnection}
                     />
                 ))}
         </div>

@@ -71,6 +71,7 @@ code {
   height: 42px;
   position: absolute;
   user-select: none;
+  z-index: 2;
 }
 
 /* Маленькие точки крепления */
@@ -148,5 +149,13 @@ code {
   position: absolute;
   width: 100%;
   height: 100%;
-  /* z-index: 1; */
+  z-index: 1;
+}
+
+path {
+  fill: none;
+  stroke: black;
+  vector-effect: non-scaling-stroke;
+  stroke-width: 2px;
+  stroke: #555;
 }

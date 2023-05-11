@@ -1,6 +1,12 @@
-const Path = () => {
+const Path = ({ path }) => {
+    const a = path.a;
+    const b = path.b;
     return (
-        <path d="M65.1828691323487,38.97098214285714 C50,38.97098214285714 50 30.513392857142854 29.8391409881927 30.513392857142854"></path>
+        <path
+            // d={`M${a.left},${a.top} C50,${a.top} 50 ${b.top} ${b.left} ${b.top}`}
+            d={`M${a.left},${a.top} L${b.left},${b.top}`}
+            onClick={() => console.log("path")}
+        ></path>
     );
 };
 
