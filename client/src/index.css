@@ -135,9 +135,17 @@ code {
   border: 2px solid #4327ff;
 }
 
+.point.startConnection {
+  background-color: yellow;
+}
+
 .point:hover {
   background-color: rgb(35, 198, 35);
 }
+
+/* .point.unavailableToConnect:hover {
+  background-color: red;
+} */
 
 .top {
   top: -15px;

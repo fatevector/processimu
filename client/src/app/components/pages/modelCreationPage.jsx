@@ -8,7 +8,7 @@ import Palette from "../ui/palette";
 import Device from "../common/device";
 
 const ModelCreationPage = () => {
-    const mapWidth = 600;
+    const mapWidth = 600; // TODO: сделать через usf
     const mapHeight = 600;
     const [devices, setDevices] = useState([]);
     const [selected, setSelected] = useState(null);
@@ -128,6 +128,7 @@ const ModelCreationPage = () => {
         const side = elem.dataset.side;
         const entrance = elem.dataset.entrance;
 
+        // TODO: сделать отображение недоступных для подключения портов
         const comparePoints = (point, deviceId, side) =>
             point.deviceId === deviceId && point.side === side;
         const checkPointForOccupationInPath = (path, deviceId, side) =>
@@ -192,6 +193,9 @@ const ModelCreationPage = () => {
                     setSelected(null);
                 }
             }
+        }
+        if (e.key === "Escape") {
+            if (startConnection) setStartConnection(null);
         }
     };
 
@@ -495,6 +499,7 @@ const ModelCreationPage = () => {
                     makeConnection={makeConnection}
                     onSelected={onSelected}
                     selected={selected}
+                    startConnection={startConnection}
                 />
             </div>
             {devices
@@ -509,6 +514,7 @@ const ModelCreationPage = () => {
                         makeConnection={makeConnection}
                         onSelected={onSelected}
                         selected={selected}
+                        startConnection={startConnection}
                     />
                 ))}
         </div>

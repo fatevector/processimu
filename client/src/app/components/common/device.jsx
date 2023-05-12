@@ -6,7 +6,8 @@ const Device = ({
     zIndex,
     makeConnection,
     onSelected,
-    selected
+    selected,
+    startConnection
 }) => {
     const style = {
         left,
@@ -35,8 +36,8 @@ const Device = ({
             <img
                 src={device.src}
                 alt={device.name}
-                width="40"
-                height="40"
+                width={device.name === "splitter" ? 30 : 40}
+                height={device.name === "splitter" ? 30 : 40}
                 draggable={false}
                 className=""
             />
@@ -45,7 +46,16 @@ const Device = ({
                     className={
                         port.side +
                         " point" +
-                        (selected?.id === device.id ? " selected" : "")
+                        (selected?.id === device.id ? " selected" : "") +
+                        (startConnection?.deviceId === device.id &&
+                        startConnection?.side === port.side
+                            ? " startConnection"
+                            : "")
+                        //     +
+                        // (startConnection.deviceId === device.id ||
+                        // startConnection.entrance === port.entrance
+                        //     ? " unavailableToConnect"
+                        //     : "")
                     }
                     key={port.side}
                     draggable={false}

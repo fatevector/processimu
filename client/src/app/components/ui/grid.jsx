@@ -10,7 +10,8 @@ const Grid = ({
     paths,
     makeConnection,
     onSelected,
-    selected
+    selected,
+    startConnection
 }) => {
     //перетаскивание сетки
     useEffect(() => {
@@ -104,6 +105,7 @@ const Grid = ({
                             makeConnection={makeConnection}
                             onSelected={onSelected}
                             selected={selected}
+                            startConnection={startConnection}
                         />
                     ))}
                 <svg id="svg" viewBox="0 0 100 100" preserveAspectRatio="none">
