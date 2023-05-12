@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import generateId from "../../utils/generateId";
 import getDeviceConfig from "../../utils/getDeviceConfig";
@@ -14,6 +14,7 @@ const ModelCreationPage = () => {
     const [selected, setSelected] = useState(null);
     const [paths, setPaths] = useState([]);
     const [startConnection, setStartConnection] = useState(null);
+    const [dragObject, setDragObject] = useState({});
 
     const removePath = id => {
         // проверяем, не выбрано ли то, что удалится
@@ -36,36 +37,28 @@ const ModelCreationPage = () => {
         return newPath;
     };
 
-    const removeDevice = useCallback(
-        id => {
-            // проверяем, не выбрано ли то, что удалится
-            console.log(selected);
-
-            if (selected) {
-                console.log(selected);
-                if (selected?.id === id) setSelected(null);
-                else {
-                    // НЕ РАБОТАЕТ ((
-                    const pathsToRemove = paths.filter(
-                        path => path.a.deviceId === id || path.b.deviceId === id
-                    );
-                    console.log(pathsToRemove);
-                    if (pathsToRemove.find(path => path.id === selected?.id))
-                        setSelected(null);
-                }
+    const removeDevice = id => {
+        // проверяем, не выбрано ли то, что удалится
+        if (selected) {
+            if (selected?.id === id) setSelected(null);
+            else {
+                const pathsToRemove = paths.filter(
+                    path => path.a.deviceId === id || path.b.deviceId === id
+                );
+                if (pathsToRemove.find(path => path.id === selected?.id))
+                    setSelected(null);
             }
+        }
 
-            // удаляем все соединения устройства
-            setPaths(prev =>
-                prev.filter(
-                    path => path.a.deviceId !== id && path.b.deviceId !== id
-                )
-            );
+        // удаляем все соединения устройства
+        setPaths(prev =>
+            prev.filter(
+                path => path.a.deviceId !== id && path.b.deviceId !== id
+            )
+        );
 
-            setDevices(prev => prev.filter(d => d.id !== id));
-        },
-        [selected]
-    );
+        setDevices(prev => prev.filter(d => d.id !== id));
+    };
 
     const addDevice = (config, left, top) => {
         const newDevice = {
@@ -202,6 +195,214 @@ const ModelCreationPage = () => {
         }
     };
 
+    const getCoords = elem => {
+        // кроме IE8-
+        const box = elem.getBoundingClientRect();
+
+        return {
+            top: box.top + window.pageYOffset,
+            left: box.left + window.pageXOffset
+        };
+    };
+
+    const onMouseDown = (e, dragObject, setDragObject) => {
+        if (e.button !== 0) {
+            // если клик не левой кнопкой мыши
+            return; // то он не запускает перенос
+        }
+
+        const elem = e.target.closest(".draggable");
+        if (!elem) return;
+
+        // запомнить переносимый объект
+        dragObject.elem = elem;
+
+        // запомнить координаты, с которых начат перенос объекта
+        dragObject.downX = e.pageX;
+        dragObject.downY = e.pageY;
+
+        if (Array.from(e.target.classList).find(c => c === "paletteElement")) {
+            const type = e.target.dataset.type;
+            const newDeviceConfig = getDeviceConfig(type);
+            if (!newDeviceConfig) return;
+            const coords = getCoords(elem);
+            const { id } = addDevice(
+                newDeviceConfig,
+                coords.left - 1,
+                coords.top - 1
+            );
+            setDragObject({
+                elem, // запомнить переносимый объект
+                downX: e.pageX, // запомнить координаты, с которых начат перенос объекта
+                downY: e.pageY,
+                fromPalette: true,
+                id
+            });
+        } else {
+            setDragObject({
+                elem, // запомнить переносимый объект
+                downX: e.pageX, // запомнить координаты, с которых начат перенос объекта
+                downY: e.pageY,
+                id: elem.dataset.id
+            });
+        }
+    };
+
+    const createAvatar = (e, dragObject) => {
+        // если схватили за точку крепления
+        if (
+            Array.from(e.target.classList).find(c => c === "point") &&
+            !dragObject.fromPalette
+        )
+            return null;
+
+        let avatar;
+        if (dragObject.fromPalette) {
+            // если только что созданное устройство с палитры
+            const elem = document.elementFromPoint(e.clientX, e.clientY);
+            avatar = elem.closest(".draggable");
+            setDragObject(prev => ({
+                ...prev,
+                fromPalette: false
+            }));
+        } else {
+            avatar = dragObject.elem;
+        }
+        const id = avatar.dataset.id;
+        editDeviceParent(id, "doc");
+
+        // функция для отмены переноса
+        avatar.rollback = function () {
+            removeDevice(id);
+        };
+
+        return avatar;
+    };
+
+    const onMouseMove = (e, dragObject, setDragObject) => {
+        if (!dragObject.elem) return; // элемент не зажат
+
+        let avatar = dragObject.avatar;
+        let shiftX = dragObject.shiftX;
+        let shiftY = dragObject.shiftY;
+        if (!avatar) {
+            // если перенос не начат,
+            // то посчитать дистанцию, на которую переместился курсор мыши
+            const moveX = e.pageX - dragObject.downX;
+            const moveY = e.pageY - dragObject.downY;
+            if (Math.abs(moveX) < 3 && Math.abs(moveY) < 3) {
+                return; // ничего не делать, мышь не передвинулась достаточно далеко
+            }
+
+            avatar = createAvatar(e, dragObject); // захватить элемент
+            if (!avatar) {
+                setDragObject({}); // аватар создать не удалось, отмена переноса
+                return; // возможно, нельзя захватить за эту часть элемента
+            }
+
+            // аватар создан успешно
+            // создать вспомогательные свойства shiftX/shiftY
+            const coords = getCoords(avatar);
+            shiftX = dragObject.downX - coords.left;
+            shiftY = dragObject.downY - coords.top;
+            setDragObject(prev => ({
+                ...prev,
+                avatar,
+                shiftX,
+                shiftY
+            }));
+        }
+
+        // отобразить перенос объекта при каждом движении мыши
+        const id = avatar.dataset.id;
+        editDevicePosition(
+            id,
+            e.pageX - shiftX,
+            e.pageY - shiftY,
+            2 // был 1
+        );
+
+        // запоминаем последнюю позицию устройства
+        setDragObject(prev => ({
+            ...prev,
+            lastPosition: {
+                left: e.pageX - dragObject.shiftX,
+                top: e.pageY - dragObject.shiftY
+            }
+        }));
+    };
+
+    const findDroppable = dragObject => {
+        if (!dragObject.lastPosition) return null;
+        const map = document.querySelector(".map");
+        const field = document.querySelector(".field");
+        const fieldCoords = field.getBoundingClientRect();
+
+        // верхний левый угол устройства над полем?
+        if (
+            fieldCoords.left <= dragObject.lastPosition.left &&
+            fieldCoords.right >= dragObject.lastPosition.left &&
+            fieldCoords.top <= dragObject.lastPosition.top &&
+            fieldCoords.bottom >= dragObject.lastPosition.top
+        )
+            return map;
+        return null;
+    };
+
+    const finishDrag = dragObject => {
+        const dropElem = findDroppable(dragObject);
+
+        if (dropElem) {
+            const id = dragObject.avatar.dataset.id;
+            const oldLeft = dragObject.lastPosition.left;
+            const oldTop = dragObject.lastPosition.top;
+
+            const coords = getCoords(dropElem);
+            const left = oldLeft - coords.left;
+            const top = oldTop - coords.top;
+            editDevicePosition(id, left, top, 2); // z-index был auto
+            editDeviceParent(id, "map");
+
+            // расширяем карту
+            const width = dropElem.getBoundingClientRect().width;
+            const height = dropElem.getBoundingClientRect().height;
+            let oldStyle = dropElem.getAttribute("style");
+            if (left + 43 > width - 100) {
+                dropElem.setAttribute(
+                    "style",
+                    `${oldStyle} width:${width + 100}px;`
+                );
+            }
+            // снова присваиваем на случай, если уже изменили ширину
+            oldStyle = dropElem.getAttribute("style");
+            if (top + 43 > height - 100) {
+                dropElem.setAttribute(
+                    "style",
+                    `${oldStyle} height:${height + 100}px`
+                );
+            }
+        } else {
+            dragObject.avatar.rollback();
+        }
+    };
+
+    const onMouseUp = (dragObject, setDragObject) => {
+        // обрабываем конец переноса, если он идёт
+        if (dragObject.avatar) {
+            finishDrag(dragObject);
+        } else {
+            // если кликнули на устройство из палитры,
+            // но не двигали его, то удалим его (палитра вне поля)
+            if (dragObject.fromPalette) {
+                removeDevice(dragObject.id);
+            }
+        }
+
+        // в конце mouseup перенос либо завершился, либо даже не начинался
+        // в любом случае очистим "состояние переноса" dragObject
+        setDragObject({});
+    };
+
     // useEffect для перемещения связей
     useEffect(() => {
         const svg = document.querySelector("#svg");
@@ -273,202 +474,15 @@ const ModelCreationPage = () => {
         });
     }, [devices]);
 
-    // useEffect для перетаскивания устройств
-    useEffect(() => {
-        let dragObject = {};
-
-        document.addEventListener("mousedown", e => {
-            if (e.button !== 0) {
-                // если клик не левой кнопкой мыши
-                return; // то он не запускает перенос
-            }
-
-            const elem = e.target.closest(".draggable");
-            if (!elem) return;
-
-            // запомнить переносимый объект
-            dragObject.elem = elem;
-
-            // запомнить координаты, с которых начат перенос объекта
-            dragObject.downX = e.pageX;
-            dragObject.downY = e.pageY;
-
-            if (
-                Array.from(e.target.classList).find(c => c === "paletteElement")
-            ) {
-                const type = e.target.dataset.type;
-                const newDeviceConfig = getDeviceConfig(type);
-                if (!newDeviceConfig) return;
-                const coords = getCoords(dragObject.elem);
-                const { id } = addDevice(
-                    newDeviceConfig,
-                    coords.left - 1,
-                    coords.top - 1
-                );
-                dragObject.fromPalette = true;
-                dragObject.id = id;
-            } else {
-                dragObject.id = elem.dataset.id;
-            }
-        });
-
-        function getCoords(elem) {
-            // кроме IE8-
-            var box = elem.getBoundingClientRect();
-
-            return {
-                top: box.top + window.pageYOffset,
-                left: box.left + window.pageXOffset
-            };
-        }
-
-        function createAvatar(e) {
-            const target = e.target;
-
-            // если схватили за точку крепления
-            if (
-                Array.from(target.classList).find(c => c === "point") &&
-                !dragObject.fromPalette
-            )
-                return null;
-
-            let avatar;
-            if (dragObject.fromPalette) {
-                // если только что созданное устройство с палитры
-                const elem = document.elementFromPoint(e.clientX, e.clientY);
-                avatar = elem.closest(".draggable");
-                dragObject.fromPalette = false;
-            } else {
-                avatar = dragObject.elem;
-            }
-            const id = avatar.dataset.id;
-            editDeviceParent(id, "doc");
-
-            // функция для отмены переноса
-            avatar.rollback = function () {
-                removeDevice(id);
-            };
-
-            return avatar;
-        }
-
-        document.addEventListener("mousemove", e => {
-            if (!dragObject.elem) return; // элемент не зажат
-
-            if (!dragObject.avatar) {
-                // если перенос не начат,
-                // то посчитать дистанцию, на которую переместился курсор мыши
-                var moveX = e.pageX - dragObject.downX;
-                var moveY = e.pageY - dragObject.downY;
-                if (Math.abs(moveX) < 3 && Math.abs(moveY) < 3) {
-                    return; // ничего не делать, мышь не передвинулась достаточно далеко
-                }
-
-                dragObject.avatar = createAvatar(e); // захватить элемент
-                if (!dragObject.avatar) {
-                    dragObject = {}; // аватар создать не удалось, отмена переноса
-                    return; // возможно, нельзя захватить за эту часть элемента
-                }
-
-                // аватар создан успешно
-                // создать вспомогательные свойства shiftX/shiftY
-                var coords = getCoords(dragObject.avatar);
-                dragObject.shiftX = dragObject.downX - coords.left;
-                dragObject.shiftY = dragObject.downY - coords.top;
-            }
-
-            // отобразить перенос объекта при каждом движении мыши
-            const id = dragObject.avatar.dataset.id;
-            editDevicePosition(
-                id,
-                e.pageX - dragObject.shiftX,
-                e.pageY - dragObject.shiftY,
-                2 // был 1
-            );
-
-            // запоминаем последнюю позицию устройства
-            dragObject.lastPosition = {
-                left: e.pageX - dragObject.shiftX,
-                top: e.pageY - dragObject.shiftY
-            };
-
-            return false;
-        });
-
-        function findDroppable(event) {
-            if (!dragObject.lastPosition) return null;
-            const map = document.querySelector(".map");
-            const field = document.querySelector(".field");
-            const fieldCoords = field.getBoundingClientRect();
-
-            // верхний левый угол устройства над полем?
-            if (
-                fieldCoords.left <= dragObject.lastPosition.left &&
-                fieldCoords.right >= dragObject.lastPosition.left &&
-                fieldCoords.top <= dragObject.lastPosition.top &&
-                fieldCoords.bottom >= dragObject.lastPosition.top
-            )
-                return map;
-            return null;
-        }
-
-        function finishDrag(e) {
-            var dropElem = findDroppable(e);
-
-            if (dropElem) {
-                const id = dragObject.avatar.dataset.id;
-                const oldLeft = dragObject.lastPosition.left;
-                const oldTop = dragObject.lastPosition.top;
-
-                const coords = getCoords(dropElem);
-                const left = oldLeft - coords.left;
-                const top = oldTop - coords.top;
-                editDevicePosition(id, left, top, 2); // z-index был auto
-                editDeviceParent(id, "map");
-
-                // расширяем карту
-                const width = dropElem.getBoundingClientRect().width;
-                const height = dropElem.getBoundingClientRect().height;
-                let oldStyle = dropElem.getAttribute("style");
-                if (left + 43 > width - 100) {
-                    dropElem.setAttribute(
-                        "style",
-                        `${oldStyle} width:${width + 100}px;`
-                    );
-                }
-                // снова присваиваем на случай, если уже изменили ширину
-                oldStyle = dropElem.getAttribute("style");
-                if (top + 43 > height - 100) {
-                    dropElem.setAttribute(
-                        "style",
-                        `${oldStyle} height:${height + 100}px`
-                    );
-                }
-            } else {
-                dragObject.avatar.rollback();
-            }
-        }
-
-        document.addEventListener("mouseup", e => {
-            // обрабываем конец переноса, если он идёт
-            if (dragObject.avatar) {
-                finishDrag(e);
-            } else {
-                // если кликнули на устройство из палитры,
-                // но не двигали его, то удалим его (палитра вне поля)
-                if (dragObject.fromPalette) {
-                    removeDevice(dragObject.id);
-                }
-            }
-
-            // в конце mouseup перенос либо завершился, либо даже не начинался
-            // в любом случае очистим "состояние переноса" dragObject
-            dragObject = {};
-        });
-    }, []);
-
     return (
-        <div className="modelPage m-3" onKeyDown={onKeyDown} tabIndex={-1}>
+        <div
+            className="modelPage m-3"
+            onKeyDown={onKeyDown}
+            tabIndex={-1}
+            onMouseDown={e => onMouseDown(e, dragObject, setDragObject)}
+            onMouseMove={e => onMouseMove(e, dragObject, setDragObject)}
+            onMouseUp={() => onMouseUp(dragObject, setDragObject)}
+        >
             <h3>Создание модели</h3>
             <div className="controlBar"></div>
             <div className="d-flex flex-row justify-content-evenly">
