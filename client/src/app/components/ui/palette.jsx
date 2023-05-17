@@ -4,12 +4,14 @@ import getDeviceConfig from "../../utils/getDeviceConfig";
 const Palette = () => {
     const devices = [
         getDeviceConfig("source"),
-        getDeviceConfig("storage"),
-        getDeviceConfig("takeFromStorage"),
+        getDeviceConfig("buffer"),
+        getDeviceConfig("takeFromBuffer"),
+        getDeviceConfig("putInBuffer"),
+        getDeviceConfig("facility"),
+        getDeviceConfig("takeFacility"),
         getDeviceConfig("delay"),
-        getDeviceConfig("putInStorage"),
         // getDeviceConfig("queue"),
-        getDeviceConfig("splitter"),
+        // getDeviceConfig("splitter"),
         getDeviceConfig("sink")
     ];
 
