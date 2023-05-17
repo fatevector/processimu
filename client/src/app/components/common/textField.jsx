@@ -7,7 +7,8 @@ const TextField = ({
     value,
     onChange,
     error,
-    placeholder
+    placeholder,
+    className = "mb-4"
 }) => {
     const [showPassword, setShowPassword] = useState(false);
 
@@ -23,7 +24,7 @@ const TextField = ({
     };
 
     return (
-        <div className="mb-4">
+        <div className={className}>
             {label && (
                 <label htmlFor={name} className="text-body bg-body">
                     {label}

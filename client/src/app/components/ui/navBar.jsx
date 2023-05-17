@@ -27,7 +27,7 @@ const NavBar = () => {
                     {isLoggedIn ? (
                         <>
                             <li className="nav-item">
-                                <Link className="nav-link" to="/creation">
+                                <Link className="nav-link" to="/edit/new">
                                     Создать
                                 </Link>
                             </li>

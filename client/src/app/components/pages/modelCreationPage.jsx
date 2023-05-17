@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
 
+import editImg from "../../icons/edit.png"; // https://www.flaticon.com/free-icon/pen_1250615?term=edit&page=1&position=13&origin=search&related_id=1250615
+import okImg from "../../icons/ok.png"; // https://www.flaticon.com/free-icon/tick_447147?term=ok&page=1&position=12&origin=search&related_id=447147
+
 import generateId from "../../utils/generateId";
 import getDeviceConfig from "../../utils/getDeviceConfig";
 
-import Grid from "../ui/grid";
+import TextField from "../common/textField";
+import ControlBar from "../ui/controlBar";
 import Palette from "../ui/palette";
+import Grid from "../ui/grid";
 import Device from "../common/device";
 
-const ModelCreationPage = () => {
-    // const mapWidth = 600; // TODO: сделать через usf
-    // const mapHeight = 600;
+const ModelCreationPage = ({ newFlag = false }) => {
+    // const [newModelFlag, setNewModelFlag] = useState(newFlag);
     const [mapWidth, setMapWidth] = useState(600);
     const [mapHeight, setMapHeight] = useState(600);
     const [devices, setDevices] = useState([]);
@@ -17,6 +21,12 @@ const ModelCreationPage = () => {
     const [paths, setPaths] = useState([]);
     const [startConnection, setStartConnection] = useState(null);
     const [dragObject, setDragObject] = useState({});
+    const [title, setTitle] = useState({
+        name: "modelName",
+        initValue: "Новая модель",
+        value: "Новая модель",
+        editingMode: false
+    });
 
     const removePath = id => {
         // проверяем, не выбрано ли то, что удалится
@@ -472,6 +482,39 @@ const ModelCreationPage = () => {
         });
     }, [devices]);
 
+    const onTitleChange = ({ name, value }) => {
+        setTitle(prev => ({
+            ...prev,
+            name,
+            value
+        }));
+    };
+
+    const onEditTitleClick = () => {
+        setTitle(prev => ({
+            ...prev,
+            editingMode: true
+        }));
+    };
+
+    const onAcceptTitleClick = () => {
+        setTitle(prev => {
+            if (prev.value.trim() === "") {
+                return {
+                    ...prev,
+                    value: prev.initValue,
+                    editingMode: false
+                };
+            } else {
+                return {
+                    ...prev,
+                    initValue: prev.value,
+                    editingMode: false
+                };
+            }
+        });
+    };
+
     return (
         <div
             className="modelPage m-3"
@@ -481,8 +524,36 @@ const ModelCreationPage = () => {
             onMouseMove={e => onMouseMove(e, dragObject, setDragObject)}
             onMouseUp={() => onMouseUp(dragObject, setDragObject)}
         >
-            <h3>Создание модели</h3>
-            <div className="controlBar"></div>
+            <div className="d-flex align-items-baseline">
+                {title.editingMode ? (
+                    <>
+                        <TextField
+                            {...title}
+                            onChange={onTitleChange}
+                            className="mb-2 me-2"
+                        />
+                        <img
+                            src={okImg}
+                            alt="Принять"
+                            width={20}
+                            height={20}
+                            onClick={onAcceptTitleClick}
+                        />
+                    </>
+                ) : (
+                    <>
+                        <h3 className="mb-3 me-2">{title.value}</h3>
+                        <img
+                            src={editImg}
+                            alt="Изменить"
+                            width={20}
+                            height={20}
+                            onClick={onEditTitleClick}
+                        />
+                    </>
+                )}
+            </div>
+            <ControlBar />
             <div className="d-flex flex-row justify-content-evenly">
                 <Palette />
                 <Grid

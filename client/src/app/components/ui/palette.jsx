@@ -16,7 +16,12 @@ const Palette = () => {
     ];
 
     return (
-        <div className="d-flex flex-column" draggable={false}>
+        <div
+            className="d-flex flex-column align-items-center"
+            // className="d-flex flex-column align-items-center border border-secondary rounded p-1"
+            draggable={false}
+        >
+            <h5>Палитра</h5>
             {devices.map(device => (
                 <div
                     className="paletteCell"
