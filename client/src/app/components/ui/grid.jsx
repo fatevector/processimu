@@ -83,9 +83,10 @@ const Grid = ({
     useEffect(() => {
         const mapNode = document.querySelector(".map");
         if (mapNode) {
+            const oldStyle = mapNode.getAttribute("style");
             mapNode.setAttribute(
                 "style",
-                `width:${mapWidth}px; height:${mapHeight}px;`
+                `${oldStyle} width:${mapWidth}px; height:${mapHeight}px;`
             );
         }
     }, [mapWidth, mapHeight]);

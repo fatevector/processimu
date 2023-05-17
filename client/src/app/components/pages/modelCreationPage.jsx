@@ -8,8 +8,10 @@ import Palette from "../ui/palette";
 import Device from "../common/device";
 
 const ModelCreationPage = () => {
-    const mapWidth = 600; // TODO: сделать через usf
-    const mapHeight = 600;
+    // const mapWidth = 600; // TODO: сделать через usf
+    // const mapHeight = 600;
+    const [mapWidth, setMapWidth] = useState(600);
+    const [mapHeight, setMapHeight] = useState(600);
     const [devices, setDevices] = useState([]);
     const [selected, setSelected] = useState(null);
     const [paths, setPaths] = useState([]);
@@ -364,26 +366,18 @@ const ModelCreationPage = () => {
             const coords = getCoords(dropElem);
             const left = oldLeft - coords.left;
             const top = oldTop - coords.top;
-            editDevicePosition(id, left, top, 2); // z-index был auto
+            editDevicePosition(id, left, top, 2);
             editDeviceParent(id, "map");
 
             // расширяем карту
             const width = dropElem.getBoundingClientRect().width;
             const height = dropElem.getBoundingClientRect().height;
-            let oldStyle = dropElem.getAttribute("style");
             if (left + 43 > width - 100) {
-                dropElem.setAttribute(
-                    "style",
-                    `${oldStyle} width:${width + 100}px;`
-                );
+                setMapWidth(width + 100);
             }
             // снова присваиваем на случай, если уже изменили ширину
-            oldStyle = dropElem.getAttribute("style");
             if (top + 43 > height - 100) {
-                dropElem.setAttribute(
-                    "style",
-                    `${oldStyle} height:${height + 100}px`
-                );
+                setMapHeight(height + 100);
             }
         } else {
             dragObject.avatar.rollback();
