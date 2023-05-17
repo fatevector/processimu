@@ -141,9 +141,14 @@ export const addModel = newModel => async (dispatch, getState) => {
     dispatch(userUpdateRequested());
     try {
         const currentUser = getState().auth.user;
+        const newModelWithTime = {
+            ...newModel,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        };
         const newModelsData = currentUser?.models
-            ? [...currentUser.models, newModel]
-            : [newModel];
+            ? [...currentUser.models, newModelWithTime]
+            : [newModelWithTime];
         // todo: возможно, из-за patch вместо put можно обойтись { models: newModelsData };
         const newUserData = currentUser
             ? {
@@ -153,13 +158,42 @@ export const addModel = newModel => async (dispatch, getState) => {
             : { models: newModelsData };
         const { content } = await userService.update(newUserData);
         dispatch(userUpdated(content));
+        history.push("/edit/" + newModelWithTime.id);
     } catch (error) {
         dispatch(updateUserFailed(error.message));
     }
 };
 
-export const editModel = newModel => async (dispatch, getState) => {
-    console.log("Реализуй editModel в authSlice");
+export const editModel = newModelData => async (dispatch, getState) => {
+    dispatch(userUpdateRequested());
+    try {
+        const currentUser = getState().auth.user;
+        let userModelsData = currentUser?.models
+            ? [...currentUser?.models]
+            : [];
+        const modelIndex = userModelsData.findIndex(
+            model => model.id === newModelData.id
+        );
+        if (modelIndex === -1) throw new Error("Модели с таким id не найдено");
+        userModelsData[modelIndex] = {
+            ...userModelsData[modelIndex],
+            ...newModelData,
+            updatedAt: Date.now()
+        };
+        // todo: возможно, из-за patch вместо put можно обойтись { models: userModelsData };
+        const newUserData = currentUser
+            ? {
+                  ...currentUser,
+                  models: userModelsData
+              }
+            : { models: userModelsData };
+        const { content } = await userService.update(newUserData);
+        dispatch(userUpdated(content));
+        history.push("/edit/" + newModelData.id);
+    } catch (error) {
+        console.log(error);
+        dispatch(updateUserFailed(error.message));
+    }
 };
 
 export const removeModel = id => async (dispatch, getState) => {
@@ -192,5 +226,8 @@ export const getCurrentUserData = () => state => state.auth.user;
 export const getAuthErrors = () => state => state.auth.error;
 
 export const getUserModels = () => state => state.auth.user?.models;
+
+export const getUserModelById = id => state =>
+    state.auth.user?.models?.find(model => model.id === id);
 
 export default authReducer;
