@@ -5,6 +5,8 @@ import { useParams } from "react-router-dom";
 import editImg from "../../icons/edit.png"; // https://www.flaticon.com/free-icon/pen_1250615?term=edit&page=1&position=13&origin=search&related_id=1250615
 import okImg from "../../icons/ok.png"; // https://www.flaticon.com/free-icon/tick_447147?term=ok&page=1&position=12&origin=search&related_id=447147
 
+import modelToProcessesConfigs from "../../simulation/modelToProcessesConfigs";
+import modelToResources from "../../simulation/modelToResources";
 import generateId from "../../utils/generateId";
 import getDeviceConfig from "../../utils/getDeviceConfig";
 import history from "../../utils/history";
@@ -605,6 +607,16 @@ const ModelEditingPage = () => {
         history.push("/models");
     };
 
+    const onStartModelClick = () => {
+        const resources = modelToResources(devices);
+        const processesConfigs = modelToProcessesConfigs(devices, paths);
+        const modelConfig = {
+            resources,
+            processesConfigs
+        };
+        console.log(modelConfig);
+    };
+
     return (
         <div
             className="modelPage m-3"
@@ -645,6 +657,7 @@ const ModelEditingPage = () => {
             </div>
             <ControlBar
                 onSaveModelClick={onSaveModelClick}
+                onStartModelClick={onStartModelClick}
                 onDeleteModelClick={onDeleteModelClick}
             />
             <div className="d-flex flex-row justify-content-evenly">

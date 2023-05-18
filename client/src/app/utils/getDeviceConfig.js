@@ -12,10 +12,10 @@ import delayImg from "../icons/delay.png"; // https://www.flaticon.com/free-icon
 // import splitterImg from "../icons/splitter.png"; // https://icons8.com/icon/30324/
 import sinkImg from "../icons/sink.png"; // https://www.flaticon.com/free-icon/close_9248474?term=delete&page=1&position=56&origin=search&related_id=9248474
 
-const configDevice = (src, name, ports) => {
+const configDevice = (src, type, ports) => {
     return {
         src,
-        name,
+        type,
         ports: ports.map(([side, entrance]) => ({
             side,
             entrance
@@ -23,7 +23,7 @@ const configDevice = (src, name, ports) => {
     };
 };
 
-const getDeviceConfig = name => {
+const getDeviceConfig = type => {
     // const TOP = "top";
     // const BOTTOM = "bottom";
     const LEFT = "left";
@@ -31,47 +31,47 @@ const getDeviceConfig = name => {
 
     const IN = "in";
     const OUT = "out";
-    switch (name) {
+    switch (type) {
         case "source":
-            return configDevice(sourceImg, name, [[RIGHT, OUT]]);
+            return configDevice(sourceImg, type, [[RIGHT, OUT]]);
         case "buffer":
-            return configDevice(bufferImg, name, []);
+            return configDevice(bufferImg, type, []);
         case "takeFromBuffer":
-            return configDevice(takeFromBufferImg, name, [
+            return configDevice(takeFromBufferImg, type, [
                 [LEFT, IN],
                 [RIGHT, OUT]
             ]);
         case "putInBuffer":
-            return configDevice(putInBufferImg, name, [
+            return configDevice(putInBufferImg, type, [
                 [LEFT, IN],
                 [RIGHT, OUT]
             ]);
         case "facility":
-            return configDevice(facilityImg, name, []);
+            return configDevice(facilityImg, type, []);
         case "takeFacility":
-            return configDevice(takeFacilityImg, name, [
+            return configDevice(takeFacilityImg, type, [
                 [LEFT, IN],
                 [RIGHT, OUT]
             ]);
         case "delay":
-            return configDevice(delayImg, name, [
+            return configDevice(delayImg, type, [
                 [LEFT, IN],
                 [RIGHT, OUT]
             ]);
         // case "queue":
-        //     return configDevice(queueImg, name, [
+        //     return configDevice(queueImg, type, [
         //         [LEFT, IN],
         //         [RIGHT, OUT]
         //     ]);
         // case "splitter":
-        //     return configDevice(splitterImg, name, [
+        //     return configDevice(splitterImg, type, [
         //         [LEFT, IN],
         //         [TOP, OUT],
         //         [RIGHT, OUT],
         //         [BOTTOM, OUT]
         //     ]);
         case "sink":
-            return configDevice(sinkImg, name, [[LEFT, IN]]);
+            return configDevice(sinkImg, type, [[LEFT, IN]]);
 
         default:
             return null;

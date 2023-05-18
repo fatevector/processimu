@@ -1,4 +1,8 @@
-const ControlBar = ({ onSaveModelClick, onDeleteModelClick }) => {
+const ControlBar = ({
+    onSaveModelClick,
+    onDeleteModelClick,
+    onStartModelClick
+}) => {
     return (
         <div className="controlBar d-flex flex-row mb-3">
             <button
@@ -6,6 +10,12 @@ const ControlBar = ({ onSaveModelClick, onDeleteModelClick }) => {
                 onClick={onSaveModelClick}
             >
                 Сохранить
+            </button>
+            <button
+                className="btn btn-sm btn-dark me-2"
+                onClick={onStartModelClick}
+            >
+                Запуск
             </button>
             <button
                 className="btn btn-sm btn-danger"

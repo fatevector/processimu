@@ -30,12 +30,12 @@ const Palette = () => {
                 >
                     <img
                         src={device.src}
-                        alt={device.name}
+                        alt={device.type}
                         width="40"
                         height="40"
                         draggable={false}
                         className="paletteElement draggable"
-                        data-type={device.name}
+                        data-type={device.type}
                     />
                 </div>
             ))}

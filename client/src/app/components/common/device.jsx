@@ -35,9 +35,9 @@ const Device = ({
         >
             <img
                 src={device.src}
-                alt={device.name}
-                width={device.name === "splitter" ? 30 : 40}
-                height={device.name === "splitter" ? 30 : 40}
+                alt={device.type}
+                width={device.type === "splitter" ? 30 : 40}
+                height={device.type === "splitter" ? 30 : 40}
                 draggable={false}
                 className=""
             />
