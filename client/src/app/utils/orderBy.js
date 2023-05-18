@@ -1,4 +1,5 @@
-const orderBy = (items = [], field, order) => {
+const orderBy = (items, field, order) => {
+    if (!items || !Array.isArray(items) || items.length === 0) return items;
     const array = [...items];
     if (typeof array[0][field] === "string")
         return order === "asc"

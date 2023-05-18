@@ -7,7 +7,13 @@ import okImg from "../../icons/ok.png"; // https://www.flaticon.com/free-icon/ti
 
 import generateId from "../../utils/generateId";
 import getDeviceConfig from "../../utils/getDeviceConfig";
-import { addModel, editModel, getUserModelById } from "../../store/auth";
+import history from "../../utils/history";
+import {
+    addModel,
+    editModel,
+    removeModel,
+    getUserModelById
+} from "../../store/auth";
 
 import TextField from "../common/textField";
 import ControlBar from "../ui/controlBar";
@@ -592,6 +598,13 @@ const ModelEditingPage = () => {
         }
     };
 
+    const onDeleteModelClick = () => {
+        if (model) {
+            dispatch(removeModel(model.id));
+        }
+        history.push("/models");
+    };
+
     return (
         <div
             className="modelPage m-3"
@@ -630,7 +643,10 @@ const ModelEditingPage = () => {
                     </>
                 )}
             </div>
-            <ControlBar onSaveModelClick={onSaveModelClick} />
+            <ControlBar
+                onSaveModelClick={onSaveModelClick}
+                onDeleteModelClick={onDeleteModelClick}
+            />
             <div className="d-flex flex-row justify-content-evenly">
                 <Palette />
                 <Grid
