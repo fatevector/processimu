@@ -200,7 +200,7 @@ export const removeModel = id => async (dispatch, getState) => {
     dispatch(userUpdateRequested());
     try {
         const currentUser = getState().auth.user;
-        const newModelsData = currentUser.models.filter(m => m.modelId !== id);
+        const newModelsData = currentUser.models.filter(m => m.id !== id);
         // todo: возможно, из-за patch вместо put можно обойтись { models: newModelsData };
         const newUserData = {
             ...currentUser,

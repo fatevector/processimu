@@ -17,12 +17,13 @@ import Device from "../common/device";
 
 const ModelEditingPage = () => {
     const { modelId } = useParams();
+    const model = useSelector(getUserModelById(modelId));
+
     let initMapWidth = 600;
     let initMapHeight = 600;
     let initDevices = [];
     let initPaths = [];
     let initTitle = "Новая модель";
-    const model = useSelector(getUserModelById(modelId));
     if (model) {
         initMapWidth = model.mapWidth;
         initMapHeight = model.mapHeight;
@@ -31,8 +32,39 @@ const ModelEditingPage = () => {
         initTitle = model.title;
     }
 
+    // для очистки состояний при изменении modelId
+    useEffect(() => {
+        if (model) {
+            setMapWidth(model.mapWidth);
+            setMapHeight(model.mapHeight);
+            setDevices(model.devices);
+            setPaths(model.paths);
+            setTitle({
+                name: "modelName",
+                initValue: model.title,
+                value: model.title,
+                editingMode: false
+            });
+        } else {
+            setMapWidth(initMapWidth);
+            setMapHeight(initMapHeight);
+            setDevices(initDevices);
+            setPaths(initPaths);
+            setTitle({
+                name: "modelName",
+                initValue: initTitle,
+                value: initTitle,
+                editingMode: false
+            });
+        }
+        setSelected(null);
+        setStartConnection(null);
+        setDragObject({});
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [modelId]);
+
     const dispatch = useDispatch();
-    // const [newModelFlag, setNewModelFlag] = useState(newFlag);
     const [mapWidth, setMapWidth] = useState(initMapWidth);
     const [mapHeight, setMapHeight] = useState(initMapHeight);
     const [devices, setDevices] = useState(initDevices);
