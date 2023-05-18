@@ -24,8 +24,6 @@ code {
   width: 600px;
   height: 600px;
   overflow: hidden;
-  border: 2px solid black;
-  border-radius: 5px;
 }
 
 .map {
@@ -177,7 +175,6 @@ code {
 
 path {
   fill: none;
-  vector-effect: non-scaling-stroke;
   stroke-width: 4px;
   stroke: black;
 }
@@ -185,4 +182,8 @@ path {
 path.selected {
   stroke-width: 6px;
   stroke: #4327ff;
+}
+
+.objectInspector {
+  width: 350px;
 }

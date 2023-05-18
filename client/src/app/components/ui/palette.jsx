@@ -17,8 +17,7 @@ const Palette = () => {
 
     return (
         <div
-            className="d-flex flex-column align-items-center"
-            // className="d-flex flex-column align-items-center border border-secondary rounded p-1"
+            className="d-flex flex-column align-items-center shadow p-2 rounded border"
             draggable={false}
         >
             <h5>Палитра</h5>

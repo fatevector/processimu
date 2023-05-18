@@ -1,5 +1,6 @@
 const ControlBar = ({
     onSaveModelClick,
+    savingDisabled,
     onDeleteModelClick,
     onStartModelClick
 }) => {
@@ -8,6 +9,7 @@ const ControlBar = ({
             <button
                 className="btn btn-sm btn-dark me-2"
                 onClick={onSaveModelClick}
+                disabled={savingDisabled}
             >
                 Сохранить
             </button>

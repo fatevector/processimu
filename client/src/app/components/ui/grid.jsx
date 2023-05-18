@@ -92,7 +92,7 @@ const Grid = ({
     }, [mapWidth, mapHeight]);
 
     return (
-        <div className="field">
+        <div className="field shadow border rounded">
             <div className="map">
                 {devices
                     .filter(d => d.parent === "map")

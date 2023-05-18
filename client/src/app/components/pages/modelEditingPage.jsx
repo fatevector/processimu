@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 
 import editImg from "../../icons/edit.png"; // https://www.flaticon.com/free-icon/pen_1250615?term=edit&page=1&position=13&origin=search&related_id=1250615
 import okImg from "../../icons/ok.png"; // https://www.flaticon.com/free-icon/tick_447147?term=ok&page=1&position=12&origin=search&related_id=447147
+import refuseImg from "../../icons/refuse.png"; // https://www.flaticon.com/free-icon/cross_8637512?term=refuse&page=1&position=27&origin=search&related_id=8637512
 
 import modelToProcessesConfigs from "../../simulation/modelToProcessesConfigs";
 import modelToResources from "../../simulation/modelToResources";
@@ -21,6 +22,7 @@ import TextField from "../common/textField";
 import ControlBar from "../ui/controlBar";
 import Palette from "../ui/palette";
 import Grid from "../ui/grid";
+import ObjectInspector from "../ui/objectInspector";
 import Device from "../common/device";
 
 const ModelEditingPage = () => {
@@ -574,6 +576,14 @@ const ModelEditingPage = () => {
         });
     };
 
+    const onRefuseTitleClick = () => {
+        setTitle(prev => ({
+            ...prev,
+            value: prev.initValue,
+            editingMode: false
+        }));
+    };
+
     const onSaveModelClick = () => {
         if (!model) {
             dispatch(
@@ -617,6 +627,10 @@ const ModelEditingPage = () => {
         console.log(modelConfig);
     };
 
+    const onSelectMap = e => {
+        console.log(e.target);
+    };
+
     return (
         <div
             className="modelPage m-3"
@@ -625,6 +639,7 @@ const ModelEditingPage = () => {
             onMouseDown={e => onMouseDown(e, dragObject, setDragObject)}
             onMouseMove={e => onMouseMove(e, dragObject, setDragObject)}
             onMouseUp={() => onMouseUp(dragObject, setDragObject)}
+            onClick={onSelectMap}
         >
             <div className="d-flex align-items-baseline">
                 {title.editingMode ? (
@@ -633,6 +648,14 @@ const ModelEditingPage = () => {
                             {...title}
                             onChange={onTitleChange}
                             className="mb-2 me-2"
+                        />
+                        <img
+                            src={refuseImg}
+                            alt="Отменить"
+                            width={17}
+                            height={17}
+                            onClick={onRefuseTitleClick}
+                            className="me-2"
                         />
                         <img
                             src={okImg}
@@ -657,6 +680,7 @@ const ModelEditingPage = () => {
             </div>
             <ControlBar
                 onSaveModelClick={onSaveModelClick}
+                savingDisabled={title.editingMode}
                 onStartModelClick={onStartModelClick}
                 onDeleteModelClick={onDeleteModelClick}
             />
@@ -672,6 +696,7 @@ const ModelEditingPage = () => {
                     selected={selected}
                     startConnection={startConnection}
                 />
+                <ObjectInspector />
             </div>
             {devices
                 .filter(d => d.parent === "doc")

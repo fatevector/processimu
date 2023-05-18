@@ -14,6 +14,7 @@ const Path = ({ path, onSelected, selected }) => {
                 className={
                     "centerPath" + (selected?.id === path.id ? " selected" : "")
                 }
+                style={{ vectorEffect: "non-scaling-stroke" }}
                 onClick={() =>
                     onSelected({
                         ...path,
