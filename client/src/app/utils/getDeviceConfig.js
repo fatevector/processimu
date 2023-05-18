@@ -12,14 +12,15 @@ import delayImg from "../icons/delay.png"; // https://www.flaticon.com/free-icon
 // import splitterImg from "../icons/splitter.png"; // https://icons8.com/icon/30324/
 import sinkImg from "../icons/sink.png"; // https://www.flaticon.com/free-icon/close_9248474?term=delete&page=1&position=56&origin=search&related_id=9248474
 
-const configDevice = (src, type, ports) => {
+const configDevice = (src, type, ports, params) => {
     return {
         src,
         type,
         ports: ports.map(([side, entrance]) => ({
             side,
             entrance
-        }))
+        })),
+        params
     };
 };
 
@@ -33,31 +34,70 @@ const getDeviceConfig = type => {
     const OUT = "out";
     switch (type) {
         case "source":
-            return configDevice(sourceImg, type, [[RIGHT, OUT]]);
+            return configDevice(sourceImg, type, [[RIGHT, OUT]], {
+                distribution: "uniform",
+                from: 1,
+                to: 1
+            });
         case "buffer":
-            return configDevice(bufferImg, type, []);
+            return configDevice(bufferImg, type, [], {
+                capacity: 1
+            });
         case "takeFromBuffer":
-            return configDevice(takeFromBufferImg, type, [
-                [LEFT, IN],
-                [RIGHT, OUT]
-            ]);
+            return configDevice(
+                takeFromBufferImg,
+                type,
+                [
+                    [LEFT, IN],
+                    [RIGHT, OUT]
+                ],
+                {
+                    resourceId: null,
+                    quantity: 1
+                }
+            );
         case "putInBuffer":
-            return configDevice(putInBufferImg, type, [
-                [LEFT, IN],
-                [RIGHT, OUT]
-            ]);
+            return configDevice(
+                putInBufferImg,
+                type,
+                [
+                    [LEFT, IN],
+                    [RIGHT, OUT]
+                ],
+                {
+                    resourceId: null,
+                    quantity: 1
+                }
+            );
         case "facility":
-            return configDevice(facilityImg, type, []);
+            return configDevice(facilityImg, type, [], {
+                capacity: 1
+            });
         case "takeFacility":
-            return configDevice(takeFacilityImg, type, [
-                [LEFT, IN],
-                [RIGHT, OUT]
-            ]);
+            return configDevice(
+                takeFacilityImg,
+                type,
+                [
+                    [LEFT, IN],
+                    [RIGHT, OUT]
+                ],
+                {
+                    resourceId: null,
+                    duration: 1
+                }
+            );
         case "delay":
-            return configDevice(delayImg, type, [
-                [LEFT, IN],
-                [RIGHT, OUT]
-            ]);
+            return configDevice(
+                delayImg,
+                type,
+                [
+                    [LEFT, IN],
+                    [RIGHT, OUT]
+                ],
+                {
+                    duration: 1
+                }
+            );
         // case "queue":
         //     return configDevice(queueImg, type, [
         //         [LEFT, IN],

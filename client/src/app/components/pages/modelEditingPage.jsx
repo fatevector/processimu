@@ -195,9 +195,9 @@ const ModelEditingPage = () => {
 
         const elem = e.target.closest(".point");
         if (!elem) return;
-        const deviceId = elem.dataset.id;
-        const side = elem.dataset.side;
-        const entrance = elem.dataset.entrance;
+        const deviceId = elem?.dataset?.id;
+        const side = elem?.dataset?.side;
+        const entrance = elem?.dataset?.entrance;
 
         // TODO: сделать отображение недоступных для подключения портов
         const comparePoints = (point, deviceId, side) =>
@@ -239,7 +239,7 @@ const ModelEditingPage = () => {
             setStartConnection(newPoint);
         } else {
             if (startConnection.deviceId === deviceId) return;
-            if (startConnection.entrance === elem.dataset.entrance) return;
+            if (startConnection.entrance === elem?.dataset?.entrance) return;
 
             // добавляем путь от out точки к in точке
             if (entrance === "in") addPath(startConnection, newPoint);
@@ -297,7 +297,7 @@ const ModelEditingPage = () => {
         dragObject.downY = e.pageY;
 
         if (Array.from(e.target.classList).find(c => c === "paletteElement")) {
-            const type = e.target.dataset.type;
+            const type = e.target?.dataset?.type;
             const newDeviceConfig = getDeviceConfig(type);
             if (!newDeviceConfig) return;
             const coords = getCoords(elem);
@@ -318,7 +318,7 @@ const ModelEditingPage = () => {
                 elem, // запомнить переносимый объект
                 downX: e.pageX, // запомнить координаты, с которых начат перенос объекта
                 downY: e.pageY,
-                id: elem.dataset.id
+                id: elem?.dataset?.id
             });
         }
     };
@@ -343,7 +343,7 @@ const ModelEditingPage = () => {
         } else {
             avatar = dragObject.elem;
         }
-        const id = avatar.dataset.id;
+        const id = avatar?.dataset?.id;
         editDeviceParent(id, "doc");
 
         // функция для отмены переноса
@@ -389,7 +389,7 @@ const ModelEditingPage = () => {
         }
 
         // отобразить перенос объекта при каждом движении мыши
-        const id = avatar.dataset.id;
+        const id = avatar?.dataset?.id;
         editDevicePosition(
             id,
             e.pageX - shiftX,
@@ -428,7 +428,7 @@ const ModelEditingPage = () => {
         const dropElem = findDroppable(dragObject);
 
         if (dropElem) {
-            const id = dragObject.avatar.dataset.id;
+            const id = dragObject.avatar?.dataset?.id;
             const oldLeft = dragObject.lastPosition.left;
             const oldTop = dragObject.lastPosition.top;
 

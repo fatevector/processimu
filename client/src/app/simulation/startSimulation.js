@@ -2,7 +2,7 @@ import { Sim } from "simjs";
 
 const startSimulation = (modelConfig, seed, simTime) => {
     const sim = new Sim.Sim();
-    const stats = new Sim.Population();
+    // const stats = new Sim.Population();
     const random = new Sim.Random(seed);
 
     const buffers = {};
@@ -88,6 +88,7 @@ const startSimulation = (modelConfig, seed, simTime) => {
                         );
 
                         const nextAgentAt = random[params.distribution](
+                            // TODO: учесть тип распределения при генерации нового агента
                             params.from,
                             params.to
                         );
