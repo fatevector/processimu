@@ -8,9 +8,12 @@ import refuseImg from "../../icons/refuse.png"; // https://www.flaticon.com/free
 
 import modelToProcessesConfigs from "../../simulation/modelToProcessesConfigs";
 import modelToResources from "../../simulation/modelToResources";
+import startSimulation from "../../simulation/startSimulation";
+
 import generateId from "../../utils/generateId";
 import getDeviceConfig from "../../utils/getDeviceConfig";
 import history from "../../utils/history";
+
 import {
     addModel,
     editModel,
@@ -765,7 +768,7 @@ const ModelEditingPage = () => {
             resources,
             processesConfigs
         };
-        console.log(modelConfig);
+        startSimulation(modelConfig, modelParams.seed, modelParams.simTime);
     };
 
     const onSelectMap = e => {

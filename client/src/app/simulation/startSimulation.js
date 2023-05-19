@@ -1,19 +1,21 @@
-import { Sim } from "simjs";
+import * as Sim from "simjs"; // без этого Webpack не подгружает библиотеку вообще
+// библиотека используется не через импорт, она модифицирует объект window
 
 const startSimulation = (modelConfig, seed, simTime) => {
-    const sim = new Sim.Sim();
+    const sim = new window.Sim.Sim();
     // const stats = new Sim.Population();
-    const random = new Sim.Random(seed);
+    const random = new window.Sim.Random(seed);
 
     const buffers = {};
     // const stores = {}
     const facilities = {};
     const defineResources = resources => {
+        console.log(resources);
         resources.forEach(resource => {
             switch (resource.type) {
                 case "buffer":
                     buffers[resource.id] = {
-                        resource: new Sim.Buffer(
+                        resource: new window.Sim.Buffer(
                             resource.id,
                             resource.params.capacity
                         ),
@@ -23,14 +25,14 @@ const startSimulation = (modelConfig, seed, simTime) => {
                     break;
                 // case "store":
                 //     stores[resource.id] = {
-                //         resource: new Sim.Store(resource.params.capacity),
+                //         resource: new window.Sim.Store(resource.params.capacity),
                 //         id: resource.id,
                 //         params: resource.params
                 //     }; // склад
                 //     break;
                 case "facility":
                     facilities[resource.id] = {
-                        resource: new Sim.Facility(
+                        resource: new window.Sim.Facility(
                             resource.id,
                             1,
                             resource.params.capacity
@@ -54,9 +56,10 @@ const startSimulation = (modelConfig, seed, simTime) => {
         const params = currentDevice.params;
         let buffer;
         let facility;
+        // console.log(this);
         switch (currentDevice.type) {
             case "source":
-                return class extends Sim.Entity {
+                return class extends window.Sim.Entity {
                     number = 0;
 
                     start() {
@@ -71,11 +74,11 @@ const startSimulation = (modelConfig, seed, simTime) => {
                             for (let bufferId in buffers) {
                                 this.putBuffer(
                                     buffers[bufferId].resource,
-                                    buffers[bufferId].params.initValue
+                                    buffers[bufferId].params.capacity // TODO: сделать параметр initValue
                                 );
                             }
                             // for (let storeId in stores) {
-                            //     for (let i = 0; i < stores[storeId].params.initValue; i++)
+                            //     for (let i = 0; i < stores[storeId].params.capacity; i++)
                             //     this.putStore(stores[storeId].resource, 'pack')
                             // }
                         }
@@ -89,8 +92,8 @@ const startSimulation = (modelConfig, seed, simTime) => {
 
                         const nextAgentAt = random[params.distribution](
                             // TODO: учесть тип распределения при генерации нового агента
-                            params.from,
-                            params.to
+                            params.lower,
+                            params.upper
                         );
                         this.setTimer(nextAgentAt).done(this.start);
                     }
