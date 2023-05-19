@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
@@ -127,6 +127,41 @@ const ModelEditingPage = () => {
         });
         return newPath;
     };
+
+    const getDeviceParams = id => {
+        return devices.find(device => device.id === id)?.params;
+    };
+
+    const setDeviceParams = useCallback(
+        id => params => {
+            console.log("setDeviceParams", params);
+            setDevices(prev =>
+                prev.map(d => {
+                    return d.id !== id
+                        ? d
+                        : {
+                              ...d,
+                              params: {
+                                  ...d.params,
+                                  ...params
+                              }
+                          };
+                })
+            );
+        },
+        [setDevices]
+    );
+
+    const setModelParamsTroughPrevState = useCallback(
+        params => {
+            console.log("setModelParamsTroughPrevState", params);
+            setModelParams(prev => ({
+                ...prev,
+                ...params
+            }));
+        },
+        [setModelParams]
+    );
 
     const removeDevice = id => {
         // проверяем, не выбрано ли то, что удалится
@@ -281,7 +316,7 @@ const ModelEditingPage = () => {
     };
 
     const onKeyDown = e => {
-        if (e.key === "Backspace" || e.key === "Delete") {
+        if ((e.shiftKey && e.key === "Backspace") || e.key === "Delete") {
             if (selected) {
                 if (selected.elementType === "path") {
                     removePath(selected.id);
@@ -733,7 +768,15 @@ const ModelEditingPage = () => {
                     selected={selected}
                     startConnection={startConnection}
                 />
-                <ObjectInspector selected={selected} />
+                <ObjectInspector
+                    selected={selected}
+                    modelParams={modelParams}
+                    setModelParamsTroughPrevState={
+                        setModelParamsTroughPrevState
+                    }
+                    getDeviceParams={getDeviceParams}
+                    setDeviceParams={setDeviceParams}
+                />
             </div>
             {devices
                 .filter(d => d.parent === "doc")

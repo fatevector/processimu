@@ -1,97 +1,121 @@
-const ParamsEditingForm = ({ selected }) => {
-    const getFieldsList = selected => {
+import { useCallback, useRef } from "react";
+
+import TextField from "../common/textField";
+
+const ParamsEditingForm = ({ selected, data, handleChange }) => {
+    const fieldsList = useRef([]).current;
+    const getFieldsList = useCallback(() => {
+        fieldsList.length = 0;
         switch (selected.type) {
             case "source":
-                switch (selected.params.distribution) {
-                    case "exponential":
-                        return [
-                            { label: "Распределение", name: "distribution" },
-                            { label: "lambda", name: "lambda" }
-                        ];
-                    case "gamma":
-                        return [
-                            { label: "Распределение", name: "distribution" },
-                            { label: "alpha", name: "alpha" },
-                            { label: "beta", name: "beta" }
-                        ];
-                    case "normal":
-                        return [
-                            { label: "Распределение", name: "distribution" },
-                            { label: "mu", name: "mu" },
-                            { label: "sigma", name: "sigma" }
-                        ];
-                    case "pareto":
-                        return [
-                            { label: "Распределение", name: "distribution" },
-                            { label: "alpha", name: "alpha" }
-                        ];
-                    case "triangular":
-                        return [
-                            { label: "Распределение", name: "distribution" },
-                            { label: "Минимальное значение", name: "lower" },
-                            { label: "Максимальное значение", name: "upper" },
-                            {
-                                label: "Наиболее вероятное значение",
-                                name: "mode"
-                            }
-                        ];
-                    case "uniform":
-                        return [
-                            { label: "Распределение", name: "distribution" },
-                            { label: "Минимальное значение", name: "lower" },
-                            { label: "Максимальное значение", name: "upper" }
-                        ];
-                    case "weibull":
-                        return [
-                            { label: "Распределение", name: "distribution" },
-                            { label: "alpha", name: "alpha" },
-                            { label: "beta", name: "beta" }
-                        ];
-                    default:
-                        break;
-                }
+                // switch (selected.params.distribution) { // TODO: брать параметры не из selected
+                //     case "exponential":
+                //         return [
+                //             { label: "Распределение", name: "distribution" },
+                //             { label: "lambda", name: "lambda" }
+                //         ];
+                //     case "gamma":
+                //         return [
+                //             { label: "Распределение", name: "distribution" },
+                //             { label: "alpha", name: "alpha" },
+                //             { label: "beta", name: "beta" }
+                //         ];
+                //     case "normal":
+                //         return [
+                //             { label: "Распределение", name: "distribution" },
+                //             { label: "mu", name: "mu" },
+                //             { label: "sigma", name: "sigma" }
+                //         ];
+                //     case "pareto":
+                //         return [
+                //             { label: "Распределение", name: "distribution" },
+                //             { label: "alpha", name: "alpha" }
+                //         ];
+                //     case "triangular":
+                //         return [
+                //             { label: "Распределение", name: "distribution" },
+                //             { label: "Минимальное значение", name: "lower" },
+                //             { label: "Максимальное значение", name: "upper" },
+                //             {
+                //                 label: "Наиболее вероятное значение",
+                //                 name: "mode"
+                //             }
+                //         ];
+                //     case "uniform":
+                //         return [
+                //             { label: "Распределение", name: "distribution" },
+                //             { label: "Минимальное значение", name: "lower" },
+                //             { label: "Максимальное значение", name: "upper" }
+                //         ];
+                //     case "weibull":
+                //         return [
+                //             { label: "Распределение", name: "distribution" },
+                //             { label: "alpha", name: "alpha" },
+                //             { label: "beta", name: "beta" }
+                //         ];
+                //     default:
+                //         break;
+                // }
                 break;
             case "buffer":
-                return [{ label: "Вместимость", name: "capacity" }];
+                fieldsList.push({ label: "Вместимость", name: "capacity" });
+                break;
             case "takeFromBuffer":
-                return [
-                    { label: "Буфер", name: "bufferId" },
-                    { label: "Количество", name: "quantity" }
-                ];
+                fieldsList.push({ label: "Буфер", name: "bufferId" });
+                fieldsList.push({ label: "Количество", name: "quantity" });
+                break;
             case "putInBuffer":
-                return [
-                    { label: "Буфер", name: "bufferId" },
-                    { label: "Количество", name: "quantity" }
-                ];
+                fieldsList.push({ label: "Буфер", name: "bufferId" });
+                fieldsList.push({ label: "Количество", name: "quantity" });
+                break;
             case "facility":
-                return [{ label: "Вместимость", name: "capacity" }];
+                fieldsList.push({ label: "Вместимость", name: "capacity" });
+                break;
             case "takeFacility":
-                return [
-                    { label: "Оборудование", name: "facilityId" },
-                    { label: "Продолжительность", name: "duration" }
-                ];
+                fieldsList.push({ label: "Оборудование", name: "facilityId" });
+                fieldsList.push({
+                    label: "Продолжительность",
+                    name: "duration"
+                });
+                break;
             case "delay":
-                return [{ label: "Продолжительность", name: "duration" }];
+                fieldsList.push({
+                    label: "Продолжительность",
+                    name: "duration"
+                });
+                break;
             case "sink":
-                return [];
+                break;
             case "model":
-                return [
-                    { label: "Зерно", name: "seed" },
-                    { label: "Продолжительность симуляции", name: "simTime" }
-                ];
+                fieldsList.push({ label: "Зерно", name: "seed" });
+                fieldsList.push({
+                    label: "Продолжительность симуляции",
+                    name: "simTime"
+                });
+                break;
             default:
                 break;
         }
         return [];
-    };
+    }, [fieldsList, selected]);
 
-    const fieldsList = getFieldsList(selected);
+    getFieldsList();
 
     return (
         <form>
-            {fieldsList.map(field => (
-                <label key={Math.random()}>{field.label}</label>
-            ))}
+            {fieldsList.map(
+                field => (
+                    // <label key={Math.random()}>{field.label}</label>
+                    <TextField
+                        label={field?.label}
+                        name={field?.name}
+                        value={data?.[field?.name] || ""}
+                        onChange={handleChange}
+                        key={field?.name}
+                    />
+                )
+                // console.log(field)
+            )}
         </form>
     );
 };
