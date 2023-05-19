@@ -7,7 +7,9 @@ const ObjectInspector = ({
     modelParams,
     setModelParamsTroughPrevState,
     getDeviceParams,
-    setDeviceParams
+    setDeviceParams,
+    buffers,
+    facilities
 }) => {
     const [formData, setFormData] = useState({});
 
@@ -30,14 +32,11 @@ const ObjectInspector = ({
 
     useEffect(() => {
         setFormData(data);
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selected]);
+    }, [data]);
 
     const handleChange = useCallback(
         target => {
-            console.log({ [target.name[0]]: target.value });
-            setData()({ [target.name[0]]: target.value });
+            setData()({ [target.name[0]]: target.value }); // TODO: почему target.name - массив?...
             setFormData(prev => ({
                 ...prev,
                 [target.name[0]]: target.value
@@ -60,6 +59,8 @@ const ObjectInspector = ({
                 selected={selected}
                 data={formData}
                 handleChange={handleChange}
+                buffers={buffers}
+                facilities={facilities}
             />
         </div>
     );

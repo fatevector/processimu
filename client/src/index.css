@@ -186,4 +186,5 @@ path.selected {
 
 .objectInspector {
   width: 350px;
+  overflow: hidden;
 }

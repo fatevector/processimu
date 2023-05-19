@@ -36,8 +36,8 @@ const getDeviceConfig = type => {
         case "source":
             return configDevice(sourceImg, type, [[RIGHT, OUT]], {
                 distribution: "uniform",
-                from: 1,
-                to: 1
+                lower: 1,
+                upper: 1
             });
         case "buffer":
             return configDevice(bufferImg, type, [], {

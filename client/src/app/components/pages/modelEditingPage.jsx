@@ -112,6 +112,8 @@ const ModelEditingPage = () => {
         editingMode: false
     });
     const [modelParams, setModelParams] = useState(initModelParams);
+    const [buffers, setBuffers] = useState([]);
+    const [facilities, setFacilities] = useState([]);
 
     const setDeviceCounter = (type, count) => {
         setModelParams(prev => ({
@@ -154,7 +156,6 @@ const ModelEditingPage = () => {
 
     const setDeviceParams = useCallback(
         id => params => {
-            console.log("setDeviceParams", params);
             setDevices(prev =>
                 prev.map(d => {
                     return d.id !== id
@@ -211,27 +212,76 @@ const ModelEditingPage = () => {
         );
 
         setDevices(prev => prev.filter(d => d.id !== id));
+        setDevices(prev =>
+            prev.map(d => {
+                const params = d.params;
+                if (params.bufferId === id) {
+                    return {
+                        ...d,
+                        params: {
+                            ...params,
+                            bufferId: null
+                        }
+                    };
+                } else if (params.facilityId === id) {
+                    return {
+                        ...d,
+                        params: {
+                            ...params,
+                            facilityId: null
+                        }
+                    };
+                }
+                return d;
+            })
+        );
+        // setFacilities(prev => prev.filter(f => f.id !== id));
+        // setBuffers(prev => prev.filter(b => b.id !== id));
     };
 
     const addDevice = (config, left, top) => {
         const sameDevicesCount = modelParams?.devicesCounters?.[config.type];
+        const params = config?.params || {};
         const newDevice = {
             ...config,
             id: generateId(),
-            name: `${config.type} ${sameDevicesCount + 1}`,
             position: {
                 left,
                 top,
                 zIndex: 1
             },
-            parent: "doc"
+            parent: "doc",
+            params: {
+                ...params,
+                name: `${config.type} ${sameDevicesCount + 1}` // TODO: изменить наименования на русские
+            }
         };
         setDeviceCounter(config.type, sameDevicesCount + 1);
+
         setDevices(prev => {
             const arr = [...prev];
             arr.push(newDevice);
             return arr;
         });
+
+        // if (config.type === "buffer") {
+        //     setBuffers(prev => [
+        //         ...prev,
+        //         {
+        //             id: newDevice.id,
+        //             name: newDevice.params.name
+        //         }
+        //     ]);
+        // } else if (config.type === "facility") {
+        //     setFacilities(prev => [
+        //         ...prev,
+        //         {
+        //             id: newDevice.id,
+        //             name: newDevice.params.name
+        //         }
+        //     ]);
+        // }
+
         return newDevice;
     };
 
@@ -726,6 +776,24 @@ const ModelEditingPage = () => {
             });
     };
 
+    // useEffect для контроля списков буферов и оборудования
+    useEffect(() => {
+        const buffers = devices
+            .filter(device => device.type === "buffer")
+            .map(device => ({
+                id: device.id,
+                name: device.params.name
+            }));
+        setBuffers(buffers);
+        const facilities = devices
+            .filter(device => device.type === "facility")
+            .map(device => ({
+                id: device.id,
+                name: device.params.name
+            }));
+        setFacilities(facilities);
+    }, [devices]);
+
     return (
         <div
             className="modelPage m-3"
@@ -799,6 +867,8 @@ const ModelEditingPage = () => {
                     }
                     getDeviceParams={getDeviceParams}
                     setDeviceParams={setDeviceParams}
+                    buffers={buffers}
+                    facilities={facilities}
                 />
             </div>
             {devices
