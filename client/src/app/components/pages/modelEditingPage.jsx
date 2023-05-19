@@ -36,7 +36,17 @@ const ModelEditingPage = () => {
     let initTitle = "Новая модель";
     let initModelParams = {
         seed: 1,
-        simTime: 10
+        simTime: 10,
+        devicesCounters: {
+            source: 0,
+            buffer: 0,
+            takeFromBuffer: 0,
+            putInBuffer: 0,
+            facility: 0,
+            takeFacility: 0,
+            delay: 0,
+            sink: 0
+        }
     };
     if (model) {
         initMapWidth = model.mapWidth;
@@ -102,6 +112,16 @@ const ModelEditingPage = () => {
         editingMode: false
     });
     const [modelParams, setModelParams] = useState(initModelParams);
+
+    const setDeviceCounter = (type, count) => {
+        setModelParams(prev => ({
+            ...prev,
+            devicesCounters: {
+                ...prev.devicesCounters,
+                [type]: count
+            }
+        }));
+    };
 
     const removePath = id => {
         // проверяем, не выбрано ли то, что удалится
@@ -194,9 +214,11 @@ const ModelEditingPage = () => {
     };
 
     const addDevice = (config, left, top) => {
+        const sameDevicesCount = modelParams?.devicesCounters?.[config.type];
         const newDevice = {
             ...config,
             id: generateId(),
+            name: `${config.type} ${sameDevicesCount + 1}`,
             position: {
                 left,
                 top,
@@ -204,6 +226,7 @@ const ModelEditingPage = () => {
             },
             parent: "doc"
         };
+        setDeviceCounter(config.type, sameDevicesCount + 1);
         setDevices(prev => {
             const arr = [...prev];
             arr.push(newDevice);
