@@ -34,12 +34,17 @@ const ModelEditingPage = () => {
     let initDevices = [];
     let initPaths = [];
     let initTitle = "Новая модель";
+    let initModelParams = {
+        seed: 1,
+        simTime: 10
+    };
     if (model) {
         initMapWidth = model.mapWidth;
         initMapHeight = model.mapHeight;
         initDevices = model.devices;
         initPaths = model.paths;
         initTitle = model.title;
+        initModelParams = model.modelParams;
     }
 
     // для очистки состояний при изменении modelId
@@ -55,6 +60,7 @@ const ModelEditingPage = () => {
                 value: model.title,
                 editingMode: false
             });
+            setModelParams(model.modelParams);
         } else {
             setMapWidth(initMapWidth);
             setMapHeight(initMapHeight);
@@ -66,8 +72,12 @@ const ModelEditingPage = () => {
                 value: initTitle,
                 editingMode: false
             });
+            setModelParams(initModelParams);
         }
-        setSelected(null);
+        setSelected({
+            type: "model",
+            elementType: "model"
+        });
         setStartConnection(null);
         setDragObject({});
 
@@ -78,7 +88,10 @@ const ModelEditingPage = () => {
     const [mapWidth, setMapWidth] = useState(initMapWidth);
     const [mapHeight, setMapHeight] = useState(initMapHeight);
     const [devices, setDevices] = useState(initDevices);
-    const [selected, setSelected] = useState(null);
+    const [selected, setSelected] = useState({
+        type: "model",
+        elementType: "model"
+    });
     const [paths, setPaths] = useState(initPaths);
     const [startConnection, setStartConnection] = useState(null);
     const [dragObject, setDragObject] = useState({});
@@ -88,10 +101,15 @@ const ModelEditingPage = () => {
         value: initTitle,
         editingMode: false
     });
+    const [modelParams, setModelParams] = useState(initModelParams);
 
     const removePath = id => {
         // проверяем, не выбрано ли то, что удалится
-        if (selected && selected?.id === id) setSelected(null);
+        if (selected && selected?.id === id)
+            setSelected({
+                type: "model",
+                elementType: "model"
+            });
 
         setPaths(prev => prev.filter(p => p.id !== id));
     };
@@ -113,13 +131,20 @@ const ModelEditingPage = () => {
     const removeDevice = id => {
         // проверяем, не выбрано ли то, что удалится
         if (selected) {
-            if (selected?.id === id) setSelected(null);
+            if (selected?.id === id)
+                setSelected({
+                    type: "model",
+                    elementType: "model"
+                });
             else {
                 const pathsToRemove = paths.filter(
                     path => path.a.deviceId === id || path.b.deviceId === id
                 );
                 if (pathsToRemove.find(path => path.id === selected?.id))
-                    setSelected(null);
+                    setSelected({
+                        type: "model",
+                        elementType: "model"
+                    });
             }
         }
 
@@ -260,10 +285,16 @@ const ModelEditingPage = () => {
             if (selected) {
                 if (selected.elementType === "path") {
                     removePath(selected.id);
-                    setSelected(null);
+                    setSelected({
+                        type: "model",
+                        elementType: "model"
+                    });
                 } else if (selected.elementType === "device") {
                     removeDevice(selected.id);
-                    setSelected(null);
+                    setSelected({
+                        type: "model",
+                        elementType: "model"
+                    });
                 }
             }
         }
@@ -593,7 +624,8 @@ const ModelEditingPage = () => {
                     devices,
                     paths,
                     mapWidth,
-                    mapHeight
+                    mapHeight,
+                    modelParams
                 })
             );
         } else {
@@ -604,7 +636,8 @@ const ModelEditingPage = () => {
                     devices,
                     paths,
                     mapWidth,
-                    mapHeight
+                    mapHeight,
+                    modelParams
                 })
             );
         }
@@ -628,7 +661,11 @@ const ModelEditingPage = () => {
     };
 
     const onSelectMap = e => {
-        console.log(e.target);
+        if (e.target.id === "svg")
+            onSelected({
+                type: "model",
+                elementType: "model"
+            });
     };
 
     return (
@@ -696,7 +733,7 @@ const ModelEditingPage = () => {
                     selected={selected}
                     startConnection={startConnection}
                 />
-                <ObjectInspector />
+                <ObjectInspector selected={selected} />
             </div>
             {devices
                 .filter(d => d.parent === "doc")

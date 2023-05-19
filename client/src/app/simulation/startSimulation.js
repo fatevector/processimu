@@ -97,7 +97,7 @@ const startSimulation = (modelConfig, seed, simTime) => {
                 };
 
             case "takeFromBuffer":
-                buffer = buffers[params.resourceId];
+                buffer = buffers[params.bufferId];
                 return this.getBuffer(buffer.resource, params.quantity).done(
                     () => {
                         console.log(
@@ -114,7 +114,7 @@ const startSimulation = (modelConfig, seed, simTime) => {
                 );
 
             case "putInBuffer":
-                buffer = buffers[params.resourceId];
+                buffer = buffers[params.bufferId];
                 return this.putBuffer(buffer.resource, params.quantity).done(
                     () => {
                         console.log(
@@ -131,7 +131,7 @@ const startSimulation = (modelConfig, seed, simTime) => {
                 );
 
             case "takeFacility":
-                facility = facilities[params.resourceId];
+                facility = facilities[params.facilityId];
                 return this.useFacility(
                     facility.resource,
                     params.duration
