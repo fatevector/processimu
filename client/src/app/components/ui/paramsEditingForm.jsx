@@ -92,6 +92,10 @@ const ParamsEditingForm = ({
                 break;
             case "buffer":
                 fieldsList.push({ label: "Вместимость", name: "capacity" });
+                fieldsList.push({
+                    label: "Начальная емкость",
+                    name: "initValue"
+                });
                 break;
             case "takeFromBuffer":
                 fieldsList.push({ label: "Буфер", name: "bufferId" });

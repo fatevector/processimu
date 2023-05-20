@@ -797,7 +797,13 @@ const ModelEditingPage = () => {
             processesConfigs
         };
 
-        startSimulation(modelConfig, modelParams.seed, modelParams.simTime);
+        try {
+            startSimulation(modelConfig, modelParams.seed, modelParams.simTime);
+        } catch (error) {
+            alert(
+                "Произошла ошибка во время симуляции. Проверьте параметры устройств и перезапустите симуляцию."
+            );
+        }
     };
 
     const onSelectMap = e => {

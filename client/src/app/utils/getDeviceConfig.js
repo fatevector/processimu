@@ -41,7 +41,8 @@ const getDeviceConfig = type => {
             });
         case "buffer":
             return configDevice(bufferImg, type, [], {
-                capacity: 1
+                capacity: 1,
+                initValue: 1
             });
         case "takeFromBuffer":
             return configDevice(

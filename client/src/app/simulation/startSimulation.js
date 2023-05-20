@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 import * as Sim from "simjs"; // без этого Webpack не подгружает библиотеку вообще
 // библиотека используется не через импорт, она модифицирует объект window
 
@@ -48,14 +49,12 @@ const startSimulation = (modelConfig, seed, simTime) => {
     };
     defineResources(modelConfig.resources);
 
-    // const processes = []
     function defineProcess(config, agentNumber, processNumber) {
         if (config.length === 0) return;
         const currentDevice = config[0];
         const params = currentDevice.params;
         let buffer;
         let facility;
-        // console.log(this);
         switch (currentDevice.type) {
             case "source":
                 return class extends window.Sim.Entity {
@@ -65,7 +64,7 @@ const startSimulation = (modelConfig, seed, simTime) => {
                         const currentAgentNumber = this.number;
                         this.number++;
                         console.log(
-                            `Новый агент ${currentAgentNumber} в ${this.time()}`
+                            `Новый агент ${currentAgentNumber} процесса ${processNumber} в ${this.time()}`
                         );
 
                         // установка изначальной емкости склада и буфера
@@ -73,7 +72,7 @@ const startSimulation = (modelConfig, seed, simTime) => {
                             for (let bufferId in buffers) {
                                 this.putBuffer(
                                     buffers[bufferId].resource,
-                                    buffers[bufferId].params.capacity // TODO: сделать параметр initValue
+                                    buffers[bufferId].params.initValue // TODO: сделать параметр initValue
                                 );
                             }
                             // for (let storeId in stores) {
@@ -89,11 +88,58 @@ const startSimulation = (modelConfig, seed, simTime) => {
                             processNumber
                         );
 
-                        const nextAgentAt = random[params.distribution](
-                            // TODO: учесть тип распределения при генерации нового агента
-                            params.lower,
-                            params.upper
-                        );
+                        // TODO: Добавить валидацию всех числовых полей
+                        let nextAgentAt;
+                        switch (params.distribution) {
+                            case "exponential":
+                                nextAgentAt = random[params.distribution](
+                                    params.lambda
+                                );
+                                break;
+                            case "gamma":
+                                nextAgentAt = random[params.distribution](
+                                    params.alpha,
+                                    params.beta
+                                );
+                                break;
+                            case "normal":
+                                nextAgentAt = random[params.distribution](
+                                    params.mu,
+                                    params.sigma
+                                );
+                                break;
+                            case "pareto":
+                                nextAgentAt = random[params.distribution](
+                                    params.alpha
+                                );
+                                break;
+                            case "triangular":
+                                nextAgentAt = random[params.distribution](
+                                    params.lower,
+                                    params.upper,
+                                    params.mode
+                                );
+                                break;
+                            case "uniform":
+                                nextAgentAt = random[params.distribution](
+                                    params.lower,
+                                    params.upper
+                                );
+                                break;
+                            case "weibull":
+                                nextAgentAt = random[params.distribution](
+                                    params.alpha,
+                                    params.beta
+                                );
+                                break;
+
+                            default:
+                                break;
+                        }
+                        if (!nextAgentAt)
+                            throw new Error(
+                                "Некорректные данные распределения"
+                            );
                         this.setTimer(nextAgentAt).done(this.start);
                     }
                 };
@@ -103,7 +149,7 @@ const startSimulation = (modelConfig, seed, simTime) => {
                 return this.getBuffer(buffer.resource, params.quantity).done(
                     () => {
                         console.log(
-                            `Агент ${agentNumber} взял из буфера в ${this.time()}`
+                            `Агент ${agentNumber} процесса ${processNumber} взял из буфера в ${this.time()}`
                         );
 
                         defineProcess.call(
@@ -120,7 +166,7 @@ const startSimulation = (modelConfig, seed, simTime) => {
                 return this.putBuffer(buffer.resource, params.quantity).done(
                     () => {
                         console.log(
-                            `Агент ${agentNumber} вернул в буфер в ${this.time()}`
+                            `Агент ${agentNumber} процесса ${processNumber} вернул в буфер в ${this.time()}`
                         );
 
                         defineProcess.call(
@@ -139,7 +185,7 @@ const startSimulation = (modelConfig, seed, simTime) => {
                     params.duration
                 ).done(() => {
                     console.log(
-                        `Агент ${agentNumber} освободил оборудование в ${this.time()}`
+                        `Агент ${agentNumber} процесса ${processNumber} освободил оборудование в ${this.time()}`
                     );
 
                     defineProcess.call(
@@ -152,7 +198,9 @@ const startSimulation = (modelConfig, seed, simTime) => {
 
             case "delay":
                 return this.setTimer(params.duration).done(() => {
-                    console.log(`Окончание задержки для агента ${agentNumber}`);
+                    console.log(
+                        `Окончание задержки для агента ${agentNumber} процесса ${processNumber}`
+                    );
 
                     defineProcess.call(
                         this,
