@@ -52,7 +52,7 @@ const getDeviceConfig = type => {
                     [RIGHT, OUT]
                 ],
                 {
-                    resourceId: null,
+                    bufferId: null,
                     quantity: 1
                 }
             );
@@ -65,7 +65,7 @@ const getDeviceConfig = type => {
                     [RIGHT, OUT]
                 ],
                 {
-                    resourceId: null,
+                    bufferId: null,
                     quantity: 1
                 }
             );
@@ -82,7 +82,7 @@ const getDeviceConfig = type => {
                     [RIGHT, OUT]
                 ],
                 {
-                    resourceId: null,
+                    facilityId: null,
                     duration: 1
                 }
             );

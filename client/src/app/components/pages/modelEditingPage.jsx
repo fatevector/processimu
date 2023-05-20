@@ -762,12 +762,41 @@ const ModelEditingPage = () => {
     };
 
     const onStartModelClick = () => {
-        const resources = modelToResources(devices);
-        const processesConfigs = modelToProcessesConfigs(devices, paths);
+        const paramsStrToParamsNum = params => {
+            const result = {};
+            Object.keys(params).forEach(property => {
+                if (
+                    ![
+                        "distribution",
+                        "bufferId",
+                        "facilityId",
+                        "name"
+                    ].includes(property)
+                ) {
+                    result[property] = Number(params[property]);
+                } else {
+                    result[property] = params[property];
+                }
+            });
+            return result;
+        };
+        const resourcesStrs = modelToResources(devices);
+        const resources = resourcesStrs.map(resource => ({
+            ...resource,
+            params: paramsStrToParamsNum(resource.params)
+        }));
+        const processesConfigsStrs = modelToProcessesConfigs(devices, paths);
+        const processesConfigs = processesConfigsStrs.map(config =>
+            config.map(device => ({
+                ...device,
+                params: paramsStrToParamsNum(device.params)
+            }))
+        );
         const modelConfig = {
             resources,
             processesConfigs
         };
+
         startSimulation(modelConfig, modelParams.seed, modelParams.simTime);
     };
 

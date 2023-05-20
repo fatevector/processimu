@@ -10,7 +10,6 @@ const startSimulation = (modelConfig, seed, simTime) => {
     // const stores = {}
     const facilities = {};
     const defineResources = resources => {
-        console.log(resources);
         resources.forEach(resource => {
             switch (resource.type) {
                 case "buffer":
