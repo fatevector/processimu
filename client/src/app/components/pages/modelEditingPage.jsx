@@ -774,30 +774,34 @@ const ModelEditingPage = () => {
                     ].includes(property)
                 ) {
                     result[property] = Number(params[property]);
+                    if (result[property] !== params[property])
+                        throw new Error();
                 } else {
                     result[property] = params[property];
                 }
             });
             return result;
         };
+
         const resourcesStrs = modelToResources(devices);
-        const resources = resourcesStrs.map(resource => ({
-            ...resource,
-            params: paramsStrToParamsNum(resource.params)
-        }));
         const processesConfigsStrs = modelToProcessesConfigs(devices, paths);
-        const processesConfigs = processesConfigsStrs.map(config =>
-            config.map(device => ({
-                ...device,
-                params: paramsStrToParamsNum(device.params)
-            }))
-        );
-        const modelConfig = {
-            resources,
-            processesConfigs
-        };
 
         try {
+            const resources = resourcesStrs.map(resource => ({
+                ...resource,
+                params: paramsStrToParamsNum(resource.params)
+            }));
+            const processesConfigs = processesConfigsStrs.map(config =>
+                config.map(device => ({
+                    ...device,
+                    params: paramsStrToParamsNum(device.params)
+                }))
+            );
+            const modelConfig = {
+                resources,
+                processesConfigs
+            };
+            console.log("it is OK");
             startSimulation(modelConfig, modelParams.seed, modelParams.simTime);
         } catch (error) {
             alert(
