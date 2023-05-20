@@ -11,7 +11,7 @@ const NavBar = () => {
     const isLoggedIn = useSelector(getIsLoggedIn());
 
     return (
-        <nav className="navbar mb-3 border border-secondary-subtle">
+        <nav className="navbar border border-secondary-subtle">
             <div className="container-fluid">
                 <ul className="nav d-flex align-items-baseline">
                     <li className="nav-item">

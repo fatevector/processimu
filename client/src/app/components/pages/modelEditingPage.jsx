@@ -28,7 +28,7 @@ import Grid from "../ui/grid";
 import ObjectInspector from "../ui/objectInspector";
 import Device from "../common/device";
 
-const ModelEditingPage = () => {
+const ModelEditingPage = ({ hidden }) => {
     const { modelId } = useParams();
     const model = useSelector(getUserModelById(modelId));
 
@@ -683,7 +683,7 @@ const ModelEditingPage = () => {
                 };
             });
         });
-    }, [devices]);
+    }, [devices, hidden]);
 
     const onTitleChange = ({ name, value }) => {
         setTitle(prev => ({
@@ -774,6 +774,8 @@ const ModelEditingPage = () => {
                     ].includes(property)
                 ) {
                     result[property] = Number(params[property]);
+                    // TODO: проверить, можно ли оставить строгое сравнение
+                    // eslint-disable-next-line
                     if (String(result[property]) != params[property]) {
                         console.log(result[property], params[property]);
                         throw new Error();
@@ -846,50 +848,58 @@ const ModelEditingPage = () => {
             onMouseMove={e => onMouseMove(e, dragObject, setDragObject)}
             onMouseUp={() => onMouseUp(dragObject, setDragObject)}
             onClick={onSelectMap}
+            hidden={hidden}
         >
-            <div className="d-flex align-items-baseline">
-                {title.editingMode ? (
-                    <>
-                        <TextField
-                            {...title}
-                            onChange={onTitleChange}
-                            className="mb-2 me-2"
-                        />
-                        <img
-                            src={refuseImg}
-                            alt="Отменить"
-                            width={17}
-                            height={17}
-                            onClick={onRefuseTitleClick}
-                            className="me-2"
-                        />
-                        <img
-                            src={okImg}
-                            alt="Принять"
-                            width={20}
-                            height={20}
-                            onClick={onAcceptTitleClick}
-                        />
-                    </>
-                ) : (
-                    <>
-                        <h3 className="mb-3 me-2">{title.value}</h3>
-                        <img
-                            src={editImg}
-                            alt="Изменить"
-                            width={20}
-                            height={20}
-                            onClick={onEditTitleClick}
-                        />
-                    </>
-                )}
+            <div className="d-flex flex-row justify-content-between">
+                <div className="d-flex align-items-baseline col-8">
+                    {title.editingMode ? (
+                        <>
+                            <TextField
+                                {...title}
+                                onChange={onTitleChange}
+                                className="mb-2 me-2"
+                            />
+                            <img
+                                src={refuseImg}
+                                alt="Отменить"
+                                width={17}
+                                height={17}
+                                onClick={onRefuseTitleClick}
+                                className="me-2"
+                            />
+                            <img
+                                src={okImg}
+                                alt="Принять"
+                                width={20}
+                                height={20}
+                                onClick={onAcceptTitleClick}
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <h3
+                                className="mb-3 me-2 overflow-hidden"
+                                style={{ whiteSpace: "nowrap" }}
+                            >
+                                {title.value}
+                            </h3>
+                            <img
+                                src={editImg}
+                                alt="Изменить"
+                                width={20}
+                                height={20}
+                                onClick={onEditTitleClick}
+                            />
+                        </>
+                    )}
+                </div>
+                <ControlBar
+                    onSaveModelClick={onSaveModelClick}
+                    savingDisabled={title.editingMode}
+                    onStartModelClick={onStartModelClick}
+                    onDeleteModelClick={onDeleteModelClick}
+                />
             </div>
-            <ControlBar
-                onSaveModelClick={onSaveModelClick}
-                savingDisabled={title.editingMode}
-                onStartModelClick={onStartModelClick}
-                onDeleteModelClick={onDeleteModelClick}
-            />
             <div className="d-flex flex-row justify-content-evenly">
                 <Palette />
                 <Grid

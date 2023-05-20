@@ -15,8 +15,16 @@ function App() {
                 <Route exact path="/" component={Main} />
                 <Route exact path="/login/:type?" component={Auth} />
                 <Route exact path="/logout" component={LogOut} />
-                <Route exact path="/edit/new" component={ModelEditing} />
-                <Route exact path="/edit/:modelId" component={ModelEditing} />
+                <Route
+                    exact
+                    path="/edit/new/:statistics?"
+                    component={ModelEditing}
+                />
+                <Route
+                    exact
+                    path="/edit/:modelId/:statistics?"
+                    component={ModelEditing}
+                />
                 <Route exact path="/models/:modelId?" component={ModelsList} />
                 <Redirect to="/" />
             </Switch>

@@ -5,7 +5,7 @@ const ControlBar = ({
     onStartModelClick
 }) => {
     return (
-        <div className="controlBar d-flex flex-row mb-3">
+        <div className="controlBar d-flex flex-row mb-3 ms-1">
             <button
                 className="btn btn-sm btn-dark me-2"
                 onClick={onSaveModelClick}
