@@ -36,13 +36,13 @@ const getDeviceConfig = type => {
         case "source":
             return configDevice(sourceImg, type, [[RIGHT, OUT]], {
                 distribution: "uniform",
-                lower: 1,
-                upper: 1
+                lower: "1",
+                upper: "1"
             });
         case "buffer":
             return configDevice(bufferImg, type, [], {
-                capacity: 1,
-                initValue: 1
+                capacity: "1",
+                initValue: "1"
             });
         case "takeFromBuffer":
             return configDevice(
@@ -53,8 +53,8 @@ const getDeviceConfig = type => {
                     [RIGHT, OUT]
                 ],
                 {
-                    bufferId: null,
-                    quantity: 1
+                    bufferId: "",
+                    quantity: "1"
                 }
             );
         case "putInBuffer":
@@ -66,13 +66,13 @@ const getDeviceConfig = type => {
                     [RIGHT, OUT]
                 ],
                 {
-                    bufferId: null,
-                    quantity: 1
+                    bufferId: "",
+                    quantity: "1"
                 }
             );
         case "facility":
             return configDevice(facilityImg, type, [], {
-                capacity: 1
+                capacity: "1"
             });
         case "takeFacility":
             return configDevice(
@@ -83,8 +83,8 @@ const getDeviceConfig = type => {
                     [RIGHT, OUT]
                 ],
                 {
-                    facilityId: null,
-                    duration: 1
+                    facilityId: "",
+                    duration: "1"
                 }
             );
         case "delay":
@@ -96,7 +96,7 @@ const getDeviceConfig = type => {
                     [RIGHT, OUT]
                 ],
                 {
-                    duration: 1
+                    duration: "1"
                 }
             );
         // case "queue":

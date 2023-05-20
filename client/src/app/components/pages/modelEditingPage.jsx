@@ -774,8 +774,10 @@ const ModelEditingPage = () => {
                     ].includes(property)
                 ) {
                     result[property] = Number(params[property]);
-                    if (result[property] !== params[property])
+                    if (String(result[property]) != params[property]) {
+                        console.log(result[property], params[property]);
                         throw new Error();
+                    }
                 } else {
                     result[property] = params[property];
                 }
@@ -801,7 +803,6 @@ const ModelEditingPage = () => {
                 resources,
                 processesConfigs
             };
-            console.log("it is OK");
             startSimulation(modelConfig, modelParams.seed, modelParams.simTime);
         } catch (error) {
             alert(
