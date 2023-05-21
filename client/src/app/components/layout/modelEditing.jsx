@@ -9,7 +9,7 @@ import ModelEditingPage from "../pages/modelEditingPage";
 const ModelEditing = () => {
     const { statistics } = useParams();
     const { modelId } = useParams();
-    const [statisticsData, setStatisticsData] = useState();
+    const [statisticsData, setStatisticsData] = useState([]);
     const [loading, setLoading] = useState(false);
 
     const goToEditor = () => {
@@ -44,7 +44,11 @@ const ModelEditing = () => {
                     </button>
                 </li>
             </ul>
-            <ModelStatisticsPage hidden={statistics !== "statistics"} />
+            <ModelStatisticsPage
+                hidden={statistics !== "statistics"}
+                statisticsData={statisticsData}
+                loading={loading}
+            />
             <ModelEditingPage
                 hidden={statistics === "statistics"}
                 loading={loading}

@@ -766,7 +766,7 @@ const ModelEditingPage = ({
         history.push("/models");
     };
 
-    const onStartModelClick = () => {
+    const onStartModelClick = async () => {
         const paramsStrToParamsNum = params => {
             const result = {};
             Object.keys(params).forEach(property => {
@@ -815,7 +815,11 @@ const ModelEditingPage = ({
             const seed = Number(modelParams.seed);
             const simTime = Number(modelParams.simTime);
 
-            const statistics = startSimulation(modelConfig, seed, simTime);
+            const statistics = await startSimulation(
+                modelConfig,
+                seed,
+                simTime
+            );
             setStatisticsData(statistics);
             setLoading(false);
         } catch (error) {

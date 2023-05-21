@@ -166,10 +166,15 @@ const startSimulation = (modelConfig, seed, simTime) => {
                 if (agentNumber === 0) {
                     currentDevice.stats = {
                         entered: 0,
-                        departured: 0
+                        departured: 0,
+                        measurements: {}
                     };
                 }
                 currentDevice.stats.entered += 1;
+                currentDevice.stats.measurements[agentNumber] = {
+                    enteredAt: this.time(),
+                    departuredAt: undefined
+                };
 
                 buffer = buffers[params.bufferId];
                 return this.getBuffer(buffer.resource, params.quantity).done(
@@ -178,6 +183,9 @@ const startSimulation = (modelConfig, seed, simTime) => {
                             `Агент ${agentNumber} процесса ${processNumber} взял из буфера в ${this.time()}`
                         );
                         currentDevice.stats.departured += 1;
+                        currentDevice.stats.measurements[
+                            agentNumber
+                        ].departuredAt = this.time();
                         buffer.stats.push({
                             time: this.time(),
                             value: buffer.resource.current()
@@ -196,10 +204,15 @@ const startSimulation = (modelConfig, seed, simTime) => {
                 if (agentNumber === 0) {
                     currentDevice.stats = {
                         entered: 0,
-                        departured: 0
+                        departured: 0,
+                        measurements: {}
                     };
                 }
                 currentDevice.stats.entered += 1;
+                currentDevice.stats.measurements[agentNumber] = {
+                    enteredAt: this.time(),
+                    departuredAt: undefined
+                };
 
                 buffer = buffers[params.bufferId];
                 return this.putBuffer(buffer.resource, params.quantity).done(
@@ -208,6 +221,9 @@ const startSimulation = (modelConfig, seed, simTime) => {
                             `Агент ${agentNumber} процесса ${processNumber} вернул в буфер в ${this.time()}`
                         );
                         currentDevice.stats.departured += 1;
+                        currentDevice.stats.measurements[
+                            agentNumber
+                        ].departuredAt = this.time();
                         buffer.stats.push({
                             time: this.time(),
                             value: buffer.resource.current()
