@@ -357,7 +357,6 @@ const startSimulation = (modelConfig, seed, simTime) => {
     Object.keys(facilities).forEach(facilityId => {
         const facility = facilities[facilityId];
         const stats = facility.stats;
-        console.log(stats);
         let fullDurationOfUsage = 0;
         for (let i = 0; i < stats.length; i++) {
             fullDurationOfUsage += stats[i].to - stats[i].from;
