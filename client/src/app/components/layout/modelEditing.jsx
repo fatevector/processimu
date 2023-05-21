@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 import history from "../../utils/history";
@@ -8,6 +9,8 @@ import ModelEditingPage from "../pages/modelEditingPage";
 const ModelEditing = () => {
     const { statistics } = useParams();
     const { modelId } = useParams();
+    const [statisticsData, setStatisticsData] = useState();
+    const [loading, setLoading] = useState(false);
 
     const goToEditor = () => {
         history.push(`/edit/${modelId ? modelId : "new"}`);
@@ -42,7 +45,12 @@ const ModelEditing = () => {
                 </li>
             </ul>
             <ModelStatisticsPage hidden={statistics !== "statistics"} />
-            <ModelEditingPage hidden={statistics === "statistics"} />
+            <ModelEditingPage
+                hidden={statistics === "statistics"}
+                loading={loading}
+                setLoading={setLoading}
+                setStatisticsData={setStatisticsData}
+            />
         </>
     );
 };

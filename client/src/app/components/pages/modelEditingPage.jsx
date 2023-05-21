@@ -28,7 +28,12 @@ import Grid from "../ui/grid";
 import ObjectInspector from "../ui/objectInspector";
 import Device from "../common/device";
 
-const ModelEditingPage = ({ hidden }) => {
+const ModelEditingPage = ({
+    hidden,
+    loading,
+    setLoading,
+    setStatisticsData
+}) => {
     const { modelId } = useParams();
     const model = useSelector(getUserModelById(modelId));
 
@@ -178,7 +183,6 @@ const ModelEditingPage = ({ hidden }) => {
 
     const setModelParamsTroughPrevState = useCallback(
         params => {
-            console.log("setModelParamsTroughPrevState", params);
             setModelParams(prev => ({
                 ...prev,
                 ...params
@@ -616,6 +620,7 @@ const ModelEditingPage = ({ hidden }) => {
 
     // useEffect для перемещения связей
     useEffect(() => {
+        if (hidden) return;
         const svg = document.querySelector("#svg");
         const svgCoords = svg.getBoundingClientRect();
         setPaths(prev => {
@@ -791,6 +796,7 @@ const ModelEditingPage = ({ hidden }) => {
         const processesConfigsStrs = modelToProcessesConfigs(devices, paths);
 
         try {
+            setLoading(true);
             const resources = resourcesStrs.map(resource => ({
                 ...resource,
                 params: paramsStrToParamsNum(resource.params)
@@ -805,8 +811,16 @@ const ModelEditingPage = ({ hidden }) => {
                 resources,
                 processesConfigs
             };
-            startSimulation(modelConfig, modelParams.seed, modelParams.simTime);
+
+            const seed = Number(modelParams.seed);
+            const simTime = Number(modelParams.simTime);
+
+            const statistics = startSimulation(modelConfig, seed, simTime);
+            setStatisticsData(statistics);
+            setLoading(false);
         } catch (error) {
+            console.log(error);
+            setLoading(false);
             alert(
                 "Произошла ошибка во время симуляции. Проверьте параметры устройств и перезапустите симуляцию."
             );
@@ -898,6 +912,7 @@ const ModelEditingPage = ({ hidden }) => {
                     savingDisabled={title.editingMode}
                     onStartModelClick={onStartModelClick}
                     onDeleteModelClick={onDeleteModelClick}
+                    loading={loading}
                 />
             </div>
             <div className="d-flex flex-row justify-content-evenly">

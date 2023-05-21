@@ -6,6 +6,7 @@ import { getUserModelById } from "../../store/auth";
 const ModelStatisticsPage = ({ hidden }) => {
     const { modelId } = useParams();
     const model = useSelector(getUserModelById(modelId));
+
     return (
         <div className="m-3" hidden={hidden}>
             <h3 className="mb-3 me-2">{model.title}</h3>

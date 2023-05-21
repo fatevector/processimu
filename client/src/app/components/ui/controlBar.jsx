@@ -2,7 +2,8 @@ const ControlBar = ({
     onSaveModelClick,
     savingDisabled,
     onDeleteModelClick,
-    onStartModelClick
+    onStartModelClick,
+    loading
 }) => {
     return (
         <div className="controlBar d-flex flex-row mb-3 ms-1">
@@ -16,6 +17,7 @@ const ControlBar = ({
             <button
                 className="btn btn-sm btn-dark me-2"
                 onClick={onStartModelClick}
+                disabled={loading}
             >
                 Запуск
             </button>

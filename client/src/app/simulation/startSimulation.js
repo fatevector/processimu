@@ -20,7 +20,14 @@ const startSimulation = (modelConfig, seed, simTime) => {
                             resource.params.capacity
                         ),
                         id: resource.id,
-                        params: resource.params
+                        type: resource.type,
+                        params: resource.params,
+                        stats: [
+                            {
+                                time: 0,
+                                value: resource.params.initValue
+                            }
+                        ]
                     }; // буфер
                     break;
                 // case "store":
@@ -38,7 +45,9 @@ const startSimulation = (modelConfig, seed, simTime) => {
                             resource.params.capacity
                         ),
                         id: resource.id,
-                        params: resource.params
+                        type: resource.type,
+                        params: resource.params,
+                        stats: []
                     }; // оборудование
                     break;
 
@@ -63,6 +72,13 @@ const startSimulation = (modelConfig, seed, simTime) => {
                     start() {
                         const currentAgentNumber = this.number;
                         this.number++;
+
+                        if (currentAgentNumber === 0) {
+                            currentDevice.stats = {
+                                departured: 0
+                            };
+                        }
+
                         console.log(
                             `Новый агент ${currentAgentNumber} процесса ${processNumber} в ${this.time()}`
                         );
@@ -140,17 +156,32 @@ const startSimulation = (modelConfig, seed, simTime) => {
                             throw new Error(
                                 "Некорректные данные распределения"
                             );
+
+                        currentDevice.stats.departured += 1;
                         this.setTimer(nextAgentAt).done(this.start);
                     }
                 };
 
             case "takeFromBuffer":
+                if (agentNumber === 0) {
+                    currentDevice.stats = {
+                        entered: 0,
+                        departured: 0
+                    };
+                }
+                currentDevice.stats.entered += 1;
+
                 buffer = buffers[params.bufferId];
                 return this.getBuffer(buffer.resource, params.quantity).done(
                     () => {
                         console.log(
                             `Агент ${agentNumber} процесса ${processNumber} взял из буфера в ${this.time()}`
                         );
+                        currentDevice.stats.departured += 1;
+                        buffer.stats.push({
+                            time: this.time(),
+                            value: buffer.resource.current()
+                        });
 
                         defineProcess.call(
                             this,
@@ -162,12 +193,25 @@ const startSimulation = (modelConfig, seed, simTime) => {
                 );
 
             case "putInBuffer":
+                if (agentNumber === 0) {
+                    currentDevice.stats = {
+                        entered: 0,
+                        departured: 0
+                    };
+                }
+                currentDevice.stats.entered += 1;
+
                 buffer = buffers[params.bufferId];
                 return this.putBuffer(buffer.resource, params.quantity).done(
                     () => {
                         console.log(
                             `Агент ${agentNumber} процесса ${processNumber} вернул в буфер в ${this.time()}`
                         );
+                        currentDevice.stats.departured += 1;
+                        buffer.stats.push({
+                            time: this.time(),
+                            value: buffer.resource.current()
+                        });
 
                         defineProcess.call(
                             this,
@@ -179,6 +223,19 @@ const startSimulation = (modelConfig, seed, simTime) => {
                 );
 
             case "takeFacility":
+                if (agentNumber === 0) {
+                    currentDevice.stats = {
+                        entered: 0,
+                        departured: 0,
+                        measurements: {}
+                    };
+                }
+                currentDevice.stats.entered += 1;
+                currentDevice.stats.measurements[agentNumber] = {
+                    enteredAt: this.time(),
+                    departuredAt: undefined
+                };
+
                 facility = facilities[params.facilityId];
                 return this.useFacility(
                     facility.resource,
@@ -187,6 +244,13 @@ const startSimulation = (modelConfig, seed, simTime) => {
                     console.log(
                         `Агент ${agentNumber} процесса ${processNumber} освободил оборудование в ${this.time()}`
                     );
+                    currentDevice.stats.departured += 1;
+                    currentDevice.stats.measurements[agentNumber].departuredAt =
+                        this.time();
+                    facility.stats.push({
+                        from: this.time() - params.duration,
+                        to: this.time()
+                    });
 
                     defineProcess.call(
                         this,
@@ -197,10 +261,19 @@ const startSimulation = (modelConfig, seed, simTime) => {
                 });
 
             case "delay":
+                if (agentNumber === 0) {
+                    currentDevice.stats = {
+                        entered: 0,
+                        departured: 0
+                    };
+                }
+                currentDevice.stats.entered += 1;
+
                 return this.setTimer(params.duration).done(() => {
                     console.log(
                         `Окончание задержки для агента ${agentNumber} процесса ${processNumber}`
                     );
+                    currentDevice.stats.departured += 1;
 
                     defineProcess.call(
                         this,
@@ -211,6 +284,12 @@ const startSimulation = (modelConfig, seed, simTime) => {
                 });
 
             case "sink":
+                if (agentNumber === 0) {
+                    currentDevice.stats = {
+                        entered: 0
+                    };
+                }
+                currentDevice.stats.entered += 1;
                 return null;
 
             default:
@@ -227,6 +306,109 @@ const startSimulation = (modelConfig, seed, simTime) => {
     defineProcessesList(modelConfig.processesConfigs);
 
     sim.simulate(simTime); // симуляция будет идти от 0 по simTime
+
+    const statistics = [];
+    Object.keys(buffers).forEach(bufferId => {
+        const buffer = buffers[bufferId];
+        const stats = buffer.stats;
+        let weightedSumOfCapacity = 0;
+        for (let i = 0; i < stats.length - 1; i++) {
+            weightedSumOfCapacity +=
+                (stats[i + 1].time - stats[i].time) * stats[i].value;
+        }
+        weightedSumOfCapacity /= simTime;
+        const averageEmployment =
+            1 - weightedSumOfCapacity / buffer.params.capacity;
+        statistics.push({
+            id: buffer.id,
+            type: buffer.type,
+            name: buffer.params.name,
+            stats: [
+                {
+                    label: "Среднее использование",
+                    name: "averageEmployment",
+                    value: `${(averageEmployment * 100).toFixed(0)}%`
+                }
+            ]
+        });
+    });
+    Object.keys(facilities).forEach(facilityId => {
+        const facility = facilities[facilityId];
+        const stats = facility.stats;
+        let fullDurationOfUsage = 0;
+        for (let i = 0; i < stats.length; i++) {
+            fullDurationOfUsage += stats[i].to - stats[i].from;
+        }
+        const durationForOneStream =
+            fullDurationOfUsage / facility.params.capacity;
+        const averageEmployment = durationForOneStream / simTime;
+        statistics.push({
+            id: facility.id,
+            type: facility.type,
+            name: facility.params.name,
+            stats: [
+                {
+                    label: "Среднее использование",
+                    name: "averageEmployment",
+                    value: `${(averageEmployment * 100).toFixed(0)}%`
+                }
+            ]
+        });
+    });
+    modelConfig.processesConfigs.forEach(process => {
+        process.forEach(device => {
+            const stats = [];
+            const measurements = device.stats.measurements;
+            if (measurements) {
+                let servedCount = 0;
+                let totalWaitingTime = 0;
+                let unservedCount = 0;
+                for (const i in measurements) {
+                    const measurement = measurements[i];
+                    if (measurement.departuredAt) {
+                        totalWaitingTime +=
+                            measurement.departuredAt - measurement.enteredAt;
+                        servedCount += 1;
+                    } else {
+                        unservedCount += 1;
+                    }
+                }
+                const averageWaitingTime = totalWaitingTime / servedCount;
+                stats.push({
+                    label: "Среднее время ожидания в очереди",
+                    name: "averageWaitingTime",
+                    value: `${averageWaitingTime.toFixed(3)}`
+                });
+                stats.push({
+                    label: "Агентов, не успевших обслужиться",
+                    name: "unservedCount",
+                    value: `${unservedCount}`
+                });
+            }
+            if (device.stats.entered) {
+                stats.push({
+                    label: "Вошло агентов",
+                    name: "entered",
+                    value: `${device.stats.entered}`
+                });
+            }
+            if (device.stats.departured) {
+                stats.push({
+                    label: "Вышло агентов",
+                    name: "departured",
+                    value: `${device.stats.departured}`
+                });
+            }
+            statistics.push({
+                id: device.id,
+                type: device.type,
+                name: device.params.name,
+                stats
+            });
+        });
+    });
+
+    return statistics;
 };
 
 export default startSimulation;
