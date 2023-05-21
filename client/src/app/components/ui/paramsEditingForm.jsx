@@ -13,82 +13,85 @@ const ParamsEditingForm = ({
     const fieldsList = useRef([]).current;
     const getFieldsList = useCallback(() => {
         fieldsList.length = 0;
+        const setFieldsForDistribution = distribution => {
+            switch (distribution) {
+                case "exponential":
+                    fieldsList.push({
+                        label: "Распределение",
+                        name: "distribution"
+                    });
+                    fieldsList.push({ label: "λ", name: "lambda" });
+                    break;
+                case "gamma":
+                    fieldsList.push({
+                        label: "Распределение",
+                        name: "distribution"
+                    });
+                    fieldsList.push({ label: "α", name: "alpha" });
+                    fieldsList.push({ label: "β", name: "beta" });
+                    break;
+                case "normal":
+                    fieldsList.push({
+                        label: "Распределение",
+                        name: "distribution"
+                    });
+                    fieldsList.push({ label: "μ", name: "mu" });
+                    fieldsList.push({ label: "σ", name: "sigma" });
+                    break;
+                case "pareto":
+                    fieldsList.push({
+                        label: "Распределение",
+                        name: "distribution"
+                    });
+                    fieldsList.push({ label: "α", name: "alpha" });
+                    break;
+                case "triangular":
+                    fieldsList.push({
+                        label: "Распределение",
+                        name: "distribution"
+                    });
+                    fieldsList.push({
+                        label: "Минимальное значение",
+                        name: "lower"
+                    });
+                    fieldsList.push({
+                        label: "Максимальное значение",
+                        name: "upper"
+                    });
+                    fieldsList.push({
+                        label: "Наиболее вероятное значение",
+                        name: "mode"
+                    });
+                    break;
+                case "uniform":
+                    fieldsList.push({
+                        label: "Распределение",
+                        name: "distribution"
+                    });
+                    fieldsList.push({
+                        label: "Минимальное значение",
+                        name: "lower"
+                    });
+                    fieldsList.push({
+                        label: "Максимальное значение",
+                        name: "upper"
+                    });
+                    break;
+                case "weibull":
+                    fieldsList.push({
+                        label: "Распределение",
+                        name: "distribution"
+                    });
+                    fieldsList.push({ label: "α", name: "alpha" });
+                    fieldsList.push({ label: "β", name: "beta" });
+                    break;
+                default:
+                    break;
+            }
+        };
         switch (selected.type) {
             case "source":
-                switch (data.distribution) {
-                    case "exponential":
-                        fieldsList.push({
-                            label: "Распределение",
-                            name: "distribution"
-                        });
-                        fieldsList.push({ label: "λ", name: "lambda" });
-                        break;
-                    case "gamma":
-                        fieldsList.push({
-                            label: "Распределение",
-                            name: "distribution"
-                        });
-                        fieldsList.push({ label: "α", name: "alpha" });
-                        fieldsList.push({ label: "β", name: "beta" });
-                        break;
-                    case "normal":
-                        fieldsList.push({
-                            label: "Распределение",
-                            name: "distribution"
-                        });
-                        fieldsList.push({ label: "μ", name: "mu" });
-                        fieldsList.push({ label: "σ", name: "sigma" });
-                        break;
-                    case "pareto":
-                        fieldsList.push({
-                            label: "Распределение",
-                            name: "distribution"
-                        });
-                        fieldsList.push({ label: "α", name: "alpha" });
-                        break;
-                    case "triangular":
-                        fieldsList.push({
-                            label: "Распределение",
-                            name: "distribution"
-                        });
-                        fieldsList.push({
-                            label: "Минимальное значение",
-                            name: "lower"
-                        });
-                        fieldsList.push({
-                            label: "Максимальное значение",
-                            name: "upper"
-                        });
-                        fieldsList.push({
-                            label: "Наиболее вероятное значение",
-                            name: "mode"
-                        });
-                        break;
-                    case "uniform":
-                        fieldsList.push({
-                            label: "Распределение",
-                            name: "distribution"
-                        });
-                        fieldsList.push({
-                            label: "Минимальное значение",
-                            name: "lower"
-                        });
-                        fieldsList.push({
-                            label: "Максимальное значение",
-                            name: "upper"
-                        });
-                        break;
-                    case "weibull":
-                        fieldsList.push({
-                            label: "Распределение",
-                            name: "distribution"
-                        });
-                        fieldsList.push({ label: "α", name: "alpha" });
-                        fieldsList.push({ label: "β", name: "beta" });
-                        break;
-                    default:
-                        break;
-                }
+                setFieldsForDistribution(data.distribution);
                 break;
             case "buffer":
                 fieldsList.push({ label: "Вместимость", name: "capacity" });
@@ -110,16 +113,10 @@ const ParamsEditingForm = ({
                 break;
             case "takeFacility":
                 fieldsList.push({ label: "Оборудование", name: "facilityId" });
-                fieldsList.push({
-                    label: "Продолжительность",
-                    name: "duration"
-                });
+                setFieldsForDistribution(data.distribution);
                 break;
             case "delay":
-                fieldsList.push({
-                    label: "Продолжительность",
-                    name: "duration"
-                });
+                setFieldsForDistribution(data.distribution);
                 break;
             case "sink":
                 break;

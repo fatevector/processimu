@@ -60,10 +60,46 @@ const startSimulation = (modelConfig, seed, simTime) => {
 
     function defineProcess(config, agentNumber, processNumber) {
         if (config.length === 0) return;
+
+        const getDurationByDistribution = (random, params, distribution) => {
+            switch (distribution) {
+                case "exponential":
+                    return random[params.distribution](params.lambda);
+                case "gamma":
+                    return random[params.distribution](
+                        params.alpha,
+                        params.beta
+                    );
+                case "normal":
+                    return random[params.distribution](params.mu, params.sigma);
+                case "pareto":
+                    return random[params.distribution](params.alpha);
+                case "triangular":
+                    return random[params.distribution](
+                        params.lower,
+                        params.upper,
+                        params.mode
+                    );
+                case "uniform":
+                    return random[params.distribution](
+                        params.lower,
+                        params.upper
+                    );
+                case "weibull":
+                    return random[params.distribution](
+                        params.alpha,
+                        params.beta
+                    );
+                default:
+                    return;
+            }
+        };
+
         const currentDevice = config[0];
         const params = currentDevice.params;
         let buffer;
         let facility;
+        let duration;
         switch (currentDevice.type) {
             case "source":
                 return class extends window.Sim.Entity {
@@ -105,53 +141,12 @@ const startSimulation = (modelConfig, seed, simTime) => {
                         );
 
                         // TODO: Добавить валидацию всех числовых полей
-                        let nextAgentAt;
-                        switch (params.distribution) {
-                            case "exponential":
-                                nextAgentAt = random[params.distribution](
-                                    params.lambda
-                                );
-                                break;
-                            case "gamma":
-                                nextAgentAt = random[params.distribution](
-                                    params.alpha,
-                                    params.beta
-                                );
-                                break;
-                            case "normal":
-                                nextAgentAt = random[params.distribution](
-                                    params.mu,
-                                    params.sigma
-                                );
-                                break;
-                            case "pareto":
-                                nextAgentAt = random[params.distribution](
-                                    params.alpha
-                                );
-                                break;
-                            case "triangular":
-                                nextAgentAt = random[params.distribution](
-                                    params.lower,
-                                    params.upper,
-                                    params.mode
-                                );
-                                break;
-                            case "uniform":
-                                nextAgentAt = random[params.distribution](
-                                    params.lower,
-                                    params.upper
-                                );
-                                break;
-                            case "weibull":
-                                nextAgentAt = random[params.distribution](
-                                    params.alpha,
-                                    params.beta
-                                );
-                                break;
+                        const nextAgentAt = getDurationByDistribution(
+                            random,
+                            params,
+                            params.distribution
+                        );
 
-                            default:
-                                break;
-                        }
                         if (!nextAgentAt)
                             throw new Error(
                                 "Некорректные данные распределения"
@@ -253,28 +248,33 @@ const startSimulation = (modelConfig, seed, simTime) => {
                 };
 
                 facility = facilities[params.facilityId];
-                return this.useFacility(
-                    facility.resource,
-                    params.duration
-                ).done(() => {
-                    console.log(
-                        `Агент ${agentNumber} процесса ${processNumber} освободил оборудование в ${this.time()}`
-                    );
-                    currentDevice.stats.departured += 1;
-                    currentDevice.stats.measurements[agentNumber].departuredAt =
-                        this.time();
-                    facility.stats.push({
-                        from: this.time() - params.duration,
-                        to: this.time()
-                    });
+                duration = getDurationByDistribution(
+                    random,
+                    params,
+                    params.distribution
+                );
+                return this.useFacility(facility.resource, duration).done(
+                    () => {
+                        console.log(
+                            `Агент ${agentNumber} процесса ${processNumber} освободил оборудование в ${this.time()}`
+                        );
+                        currentDevice.stats.departured += 1;
+                        currentDevice.stats.measurements[
+                            agentNumber
+                        ].departuredAt = this.time();
+                        facility.stats.push({
+                            from: this.time() - duration,
+                            to: this.time()
+                        });
 
-                    defineProcess.call(
-                        this,
-                        config.slice(1),
-                        agentNumber,
-                        processNumber
-                    );
-                });
+                        defineProcess.call(
+                            this,
+                            config.slice(1),
+                            agentNumber,
+                            processNumber
+                        );
+                    }
+                );
 
             case "delay":
                 if (agentNumber === 0) {
@@ -285,7 +285,13 @@ const startSimulation = (modelConfig, seed, simTime) => {
                 }
                 currentDevice.stats.entered += 1;
 
-                return this.setTimer(params.duration).done(() => {
+                duration = getDurationByDistribution(
+                    random,
+                    params,
+                    params.distribution
+                );
+
+                return this.setTimer(duration).done(() => {
                     console.log(
                         `Окончание задержки для агента ${agentNumber} процесса ${processNumber}`
                     );
@@ -351,10 +357,33 @@ const startSimulation = (modelConfig, seed, simTime) => {
     Object.keys(facilities).forEach(facilityId => {
         const facility = facilities[facilityId];
         const stats = facility.stats;
+        console.log(stats);
         let fullDurationOfUsage = 0;
         for (let i = 0; i < stats.length; i++) {
             fullDurationOfUsage += stats[i].to - stats[i].from;
         }
+
+        // проверка на то, что какой-то агент еще занимает оборудование и не вышел
+        let takeFacilityDevices = [];
+        modelConfig.processesConfigs.forEach(process => {
+            takeFacilityDevices = [
+                ...takeFacilityDevices,
+                ...process.filter(device => device.type === "takeFacility")
+            ];
+        });
+        takeFacilityDevices = takeFacilityDevices.filter(
+            device => device.params.facilityId === facilityId
+        );
+        for (let i = 0; i < takeFacilityDevices.length; i++) {
+            if (
+                takeFacilityDevices[i].stats.entered >
+                takeFacilityDevices[i].stats.departured
+            ) {
+                fullDurationOfUsage += simTime - stats[stats.length - 1].to;
+                break;
+            }
+        }
+
         const durationForOneStream =
             fullDurationOfUsage / facility.params.capacity;
         const averageEmployment = durationForOneStream / simTime;

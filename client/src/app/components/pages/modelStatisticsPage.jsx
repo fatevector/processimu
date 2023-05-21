@@ -14,7 +14,8 @@ const ModelStatisticsPage = ({ hidden, statisticsData, loading }) => {
 
     return (
         <div className="m-3" hidden={hidden}>
-            <h3 className="mb-3 me-2">{model.title}</h3>
+            {/* TODO: сделать подхват изменения названия не только после сохранения */}
+            <h3 className="mb-3 me-2">{model?.title || "Новая модель"}</h3>
             <div className="d-flex flex-row justify-content-center">
                 {loading ? (
                     <h5 className="d-flex flex-column align-items-center">

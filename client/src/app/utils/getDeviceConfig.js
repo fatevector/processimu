@@ -84,7 +84,9 @@ const getDeviceConfig = type => {
                 ],
                 {
                     facilityId: "",
-                    duration: "1"
+                    distribution: "uniform",
+                    lower: "1",
+                    upper: "1"
                 }
             );
         case "delay":
@@ -96,7 +98,9 @@ const getDeviceConfig = type => {
                     [RIGHT, OUT]
                 ],
                 {
-                    duration: "1"
+                    distribution: "uniform",
+                    lower: "1",
+                    upper: "1"
                 }
             );
         // case "queue":
