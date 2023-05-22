@@ -340,14 +340,14 @@ const startSimulation = (modelConfig, seed, simTime) => {
         }
         weightedSumOfCapacity /= simTime;
         const averageEmployment =
-            1 - weightedSumOfCapacity / buffer.params.capacity;
+            weightedSumOfCapacity / buffer.params.capacity;
         statistics.push({
             id: buffer.id,
             type: buffer.type,
             name: buffer.params.name,
             stats: [
                 {
-                    label: "Среднее использование",
+                    label: "Средняя заполненность",
                     name: "averageEmployment",
                     value: `${(averageEmployment * 100).toFixed(0)}%`
                 }
